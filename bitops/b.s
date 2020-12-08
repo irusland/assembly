@@ -1,6 +1,6 @@
 .globl _start
 .data
-msg:	.ascii	"Hello bit!\n"
+msg:	.ascii	"Iello bit!\n"
 lmsg = . - msg
 msg2:	.fill	lmsg,	1,	0
 
@@ -12,7 +12,7 @@ _start:
 	mov	$msg2,	%rdi
 	mov	$lmsg,	%ecx
 	shl	$3,	%ecx
-
+	dec	%ecx
 1:
 #		numbit	addrs
 	bt	%rcx,	(%rsi)
@@ -23,7 +23,7 @@ _start:
 #	podnyat' v msg2
 2:
 	dec	%ecx
-	jnz	1b
+	jns	1b
 
 	mov	$msg,	%rsi
 	call	print
