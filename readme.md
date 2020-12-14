@@ -15,3 +15,6 @@ ld -o b b.o
 $ man syscall
 $ man 2 write
 vim /usr/include/x86_64-linux-gnu/asm/unistd_64.h
+
+
+gcc info.C -lstdc++
