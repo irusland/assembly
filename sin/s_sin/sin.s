@@ -1,16 +1,6 @@
-.data
-.align 4
-_pi:	.long	0
-
-
 .globl sinus
 .text
 sinus:
-	finit
-	fldpi
-	fst	_pi
-	movss	_pi,	%xmm3
-
 #	x
 	cvtsi2ss	%edi,	%xmm0
 
