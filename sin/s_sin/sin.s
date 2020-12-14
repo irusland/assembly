@@ -1,8 +1,20 @@
+.data
+.align 4
+_pi:	.long	0
+
+
 .globl sinus
 .text
 sinus:
+	fldpi
+	fst	_pi
+	movss	_pi,	%xmm0
+	mov	$1,	%rdx
+	cvtsi2ss	%rdx,	%xmm1
+
+	divss	%xmm1,	%xmm0
 #	x
-	cvtsi2ss	%edi,	%xmm0
+#	cvtsi2ss	%edi,	%xmm0
 
 #	taylor sum
 	mov	$0,	%rax
@@ -48,7 +60,11 @@ for:
 
 #	check if change was a little
 	comiss	%xmm1,	%xmm7
+	movss	%xmm1,	%xmm7
 	jnz	for
 
+	cvtsi2ss	%rcx,	%xmm0
+	ret
+	
 	movss	%xmm9,	%xmm0
 	ret
