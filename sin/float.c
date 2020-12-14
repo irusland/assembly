@@ -1,9 +1,9 @@
 #include <stdio.h>
 
-float get_number(int x, int y);
+float sinus(int x);
 
 int main(void) {
-        printf("X = %f\n", get_number(5, 40));
+        printf("X = %f\n", sinus(1));
         return 0;
 }
 

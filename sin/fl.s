@@ -3,9 +3,9 @@
 _pi:	.long	0
 
 
-.globl get_number
+.globl sinus
 .text
-get_number:
+sinus:
 	finit
 	fldpi
 	fst	_pi
