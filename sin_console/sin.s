@@ -155,23 +155,30 @@ for:
 	movss	%xmm9,	%xmm0
 	ret
 
-#-----------------------
 
 print_sinus:
+#	precision 9 digits
 	mov	$1000000000,	%rax
 	cvtsi2ss %rax,	%xmm1
 	mulss	%xmm1,	%xmm0
+#	round
 	cvtss2si %xmm0,	%rax
-	mov	$10,	%r12
+#	digit counter
 	mov	$8,	%r11
-fract_part:
+
+#	extract fraction
+1:
 	xor	%rdx,	%rdx
+	mov     $10,    %r12
+#	% 10 -> dl
 	div	%r12
-	add	$0x30,	%dl
+#	num to ascii num char
+	add	$48,	%dl
 	mov	%dl,	fract(%r11)
 	dec	%r11
-	jns	fract_part
+	jns	1b
 
+#	integer part
 	xor	%rdx,	%rdx
 	div	%r12
 	add	$0x30,	%dl
