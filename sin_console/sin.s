@@ -75,12 +75,18 @@ step:
 
 #	load char on %rsi
 	lodsb
-	test	%al,	%al
-	jz	2f
+
+#	check 0
+	cmp	$0,	%al
+	je	2f
+
+#	[0...9]
 	cmp	$0x30,	%al
 	jb	1f
 	cmp	$0x39,	%al
 	ja	1f
+
+#	to char
 	sub	$0x30,	%eax
 	mov	%eax,	%ecx
 
@@ -89,9 +95,10 @@ step:
 
 #	* 10
 	mul	%ebx
+
 #	+ n
 	add	%ecx,	%eax
-	cmp	$91,	%eax	
+	cmp	$91,	%eax
 	jb	step
 1:
 #	print out of range exception
