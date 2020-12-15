@@ -41,7 +41,7 @@ _start:
 	pop	%rbx
 	cmp	$1,	%ebx
 	jne	has_arg
-	printstr "Write value\n"
+	printstr "Input x\n"
 	exit
 
 has_arg:	
@@ -79,7 +79,7 @@ read_char:
 	cmp	$90,	%eax	
 	jbe	read_char
 error:
-	printstr	"Invalid argument\n"
+	printstr	"x in [0, 90]\n"
 	exit	
 	
 correct:
@@ -119,7 +119,7 @@ sinus:
 	movss	%xmm9,	%xmm7
 
 #	sum as recurrence relation
-for:
+1:
 #	result in xmm9!!!
 	addss	%xmm1,	%xmm9
 
@@ -150,7 +150,7 @@ for:
 #	check if change was a little
 	comiss	%xmm1,	%xmm7
 	movss   %xmm1,  %xmm7
-	jnz	for
+	jnz	1b
 
 	movss	%xmm9,	%xmm0
 	ret
@@ -166,26 +166,27 @@ print_sinus:
 #	digit counter
 	mov	$8,	%r11
 
-#	extract fraction
 1:
-	xor	%rdx,	%rdx
-	mov     $10,    %r12
-#	% 10 -> dl
-	div	%r12
-#	num to ascii num char
-	add	$48,	%dl
+#	extract fraction
+	call	get_digit
 	mov	%dl,	fract(%r11)
 	dec	%r11
 	jns	1b
 
-#	integer part
-	xor	%rdx,	%rdx
-	div	%r12
-	add	$0x30,	%dl
+#	extract integer
+	call	get_digit	
 	mov	%dl,	int
 
-
 	print	answer, lans
+	ret
+
+
+#	last digit of rax -> dl
+get_digit:
+        mov     $10,    %r12
+	xor     %rdx,   %rdx
+	div     %r12
+	add     $48,  %dl
 	ret
 
 #------------------------
