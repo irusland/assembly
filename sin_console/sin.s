@@ -38,11 +38,16 @@ _start:
 #	get argument to parse
 	pop 	%rax
 	pop	%rax
-	call 	parse		# 
-	call	to_radians
-	call	sin		# %xmm0 = sin(x)	cycles = %r10
-	call	print_sinus
-	call	print_count
+
+#	calculations
+	call 	parse		# stdin -> %eax degrees
+	call	to_radians	# %eax degrees -> %xmm0 radians
+	call	sin		# %xmm0 = sin(x); cycles = %r10
+
+#	final output
+	call	sin_print
+	call	cycles
+
 
 exit:
 	mov     $0,	%edi
@@ -57,13 +62,17 @@ print:
 	ret
 
 
+
 parse:
+#	argument -> %rsi
 	mov	%rax,	%rsi
 	xor	%eax,	%eax
 	mov	$10,	%ebx
 step:
 	push	%rax
 	xor	%eax,	%eax
+
+#	load char on %rsi
 	lodsb
 	test	%al,	%al
 	jz	2f
@@ -74,7 +83,10 @@ step:
 	sub	$0x30,	%eax
 	mov	%eax,	%ecx
 	pop	%rax
+
+#	* 10
 	mul	%ebx
+#	+ n
 	add	%ecx,	%eax
 	cmp	$91,	%eax	
 	jb	step
@@ -157,7 +169,7 @@ sin:
 	ret
 
 
-print_sinus:
+sin_print:
 #	precision 9 digits
 	mov	$1000000000,	%rax
 	cvtsi2ss %rax,	%xmm1
@@ -194,7 +206,7 @@ get_digit:
 
 
 #	integer print from lectures
-print_count:
+cycles:
 	mov	%r10,	%rax
 	mov	$cnt,	%rdi
 	xor	%rcx,	%rcx	
