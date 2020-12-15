@@ -6,10 +6,10 @@ lno_x = . - no_x
 x_in:	.ascii	"ArgumentOutOfRangeException\n"
 lx_in = . - x_in
 
-answer:	.ascii	"sin(x)\t"
-int:	.ascii	"0."
-fract:	.ascii	"000000000\n"
-lans = . - answer
+ssin:	.ascii	"sin(x)\t"
+ssin_h:	.ascii	"0."
+ssin_l:	.ascii	"000000000\n"
+lssin = . - ssin
 
 cnt_answer:	.ascii "cycles\t"
 cnt:	.ascii "    \n"
@@ -69,7 +69,7 @@ parse:
 	xor	%eax,	%eax
 	mov	$10,	%ebx
 step:
-#	save %rax
+#	save x in %rdx
 	mov	%rax,	%rdx
 	xor	%eax,	%eax
 
@@ -85,19 +85,16 @@ step:
 	jb	1f
 	cmp	$0x39,	%al
 	ja	1f
-
-#	to char
 	sub	$0x30,	%eax
 	mov	%eax,	%ecx
 
-#	load %rax
 	mov	%rdx,	%rax
 
 #	* 10
 	mul	%ebx
-
 #	+ n
 	add	%ecx,	%eax
+
 	cmp	$91,	%eax
 	jb	step
 1:
@@ -108,6 +105,7 @@ step:
 	jmp	exit
 	
 2:
+#	x -> %rax
 	mov	%rdx,	%rax
 	ret
 
@@ -192,16 +190,17 @@ sin_print:
 1:
 #	extract fraction
 	call	get_digit
-	mov	%dl,	fract(%r11)
+	mov	%dl,	ssin_l(%r11)
+#	next digit
 	dec	%r11
 	jns	1b
 
 #	extract integer
 	call	get_digit	
-	mov	%dl,	int
+	mov	%dl,	ssin_h
 
-	mov	$answer,	%rsi
-	mov	$lans,		%rdx
+	mov	$ssin,	%rsi
+	mov	$lssin,	%rdx
 	call	print
 	ret
 
