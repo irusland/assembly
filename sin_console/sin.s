@@ -49,20 +49,7 @@ _start:
 #	final output
 	call	sin_print
 	call	cycles
-
-
-exit:
-	mov     $0,	%edi
-	mov     $60,    %eax
-	syscall
-
-
-print:
-	mov	$1,	%rax
-	mov	$1,	%rdi
-	syscall
-	ret
-
+	jmp	exit
 
 
 parse:
@@ -239,3 +226,14 @@ cycles:
 	call	print
 	ret
 
+
+exit:
+	mov     $0,     %edi
+	mov     $60,    %eax
+	syscall
+
+print:
+	mov     $1,    %rax
+	mov     $1,     %rdi
+	syscall
+	ret
