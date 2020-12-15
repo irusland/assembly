@@ -33,8 +33,8 @@ len = . - 99b
 .text
 .globl _start
 _start:
-	pop	%rbx
-	cmp	$1,	%ebx
+	pop	%rax
+	cmp	$1,	%eax
 	jne	1f
 	printstr "Input x\n"
 	jmp	exit
