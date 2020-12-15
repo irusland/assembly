@@ -69,8 +69,8 @@ parse:
 	xor	%eax,	%eax
 	mov	$10,	%ebx
 step:
-#	push	%rax
-	mov	%rax,	%r9
+#	save %rax
+	mov	%rax,	%rdx
 	xor	%eax,	%eax
 
 #	load char on %rsi
@@ -83,7 +83,9 @@ step:
 	ja	1f
 	sub	$0x30,	%eax
 	mov	%eax,	%ecx
-	mov	%r9,	%rax
+
+#	load %rax
+	mov	%rdx,	%rax
 
 #	* 10
 	mul	%ebx
@@ -99,7 +101,7 @@ step:
 	jmp	exit
 	
 2:
-	mov	%r9,	%rax
+	mov	%rdx,	%rax
 	ret
 
 
