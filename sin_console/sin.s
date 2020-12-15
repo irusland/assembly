@@ -40,8 +40,8 @@ _start:
 	jmp	exit
 
 1:	
-	pop 	%rsi
-	pop	%rsi
+	pop 	%rax
+	pop	%rax
 	call 	read_arg
 	call	to_radians
 	call	sin		# %xmm0 = sin(x)	cycles = %r10
@@ -57,6 +57,7 @@ exit:
 #------------------------------
 
 read_arg:
+	mov	%rax,	%rsi
 	xor	%eax,	%eax
 	mov	$10,	%ebx
 read_char:
