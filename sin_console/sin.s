@@ -11,11 +11,6 @@ lcnt = . - cnt_answer
 _pi:	.long	0
 
 .nolist
-.macro exit code=$0
-	mov	\code,	%edi
-	mov	$60,	%eax
-	syscall
-.endm
 
 .macro print straddr strlen
 	mov	$1,	%rax
@@ -42,7 +37,7 @@ _start:
 	cmp	$1,	%ebx
 	jne	has_arg
 	printstr "Input x\n"
-	exit
+	jmp	exit
 
 has_arg:	
 	pop 	%rsi
@@ -52,8 +47,11 @@ has_arg:
 	call	sinus
 	call	print_sinus
 	call	print_count
-	
-	exit
+
+exit:
+	mov     $0,  %edi
+	mov     $60,    %eax
+	syscall
 
 
 #------------------------------
@@ -80,7 +78,7 @@ read_char:
 	jbe	read_char
 error:
 	printstr	"x in [0, 90]\n"
-	exit	
+	jmp	exit	
 	
 correct:
 	pop	%rax
@@ -189,8 +187,8 @@ get_digit:
 	add     $48,  %dl
 	ret
 
-#------------------------
 
+#	integer print from lectures
 print_count:
 	mov	%r10,	%rax
 	mov	$cnt,	%rdi
