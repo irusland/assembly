@@ -1,9 +1,9 @@
 .data
 
-no_x:	.ascii	"Input x\n"
+no_x:	.ascii	"ArgumentNullException\n"
 lno_x = . - no_x
 
-x_in:	.ascii	"x in [0, 90]\n"
+x_in:	.ascii	"ArgumentOutOfRangeException\n"
 lx_in = . - x_in
 
 answer:	.ascii	"sin(x)\t"
@@ -27,17 +27,18 @@ _start:
 #	check if exists
 	cmp	$1,	%eax
 	jne	1f
-	
+
+#	print error info
         mov	$no_x,	%rsi
 	mov	$lno_x,	%rdx
 	call	print
 	jmp	exit
 
 1:
-
+#	get argument to parse
 	pop 	%rax
 	pop	%rax
-	call 	parse
+	call 	parse		# 
 	call	to_radians
 	call	sin		# %xmm0 = sin(x)	cycles = %r10
 	call	print_sinus
@@ -65,7 +66,7 @@ step:
 	xor	%eax,	%eax
 	lodsb
 	test	%al,	%al
-	jz	correct
+	jz	2f
 	cmp	$0x30,	%al
 	jb	1f
 	cmp	$0x39,	%al
@@ -78,12 +79,13 @@ step:
 	cmp	$91,	%eax	
 	jb	step
 1:
+#	print out of range exception
 	mov	$x_in,	%rsi
 	mov	$lx_in,	%rdx
 	call	print
 	jmp	exit
 	
-correct:
+2:
 	pop	%rax
 	ret
 
