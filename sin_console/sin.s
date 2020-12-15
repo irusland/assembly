@@ -1,5 +1,4 @@
 .data
-
 no_x:	.ascii	"ArgumentNullException\n"
 lno_x = . - no_x
 
@@ -11,12 +10,15 @@ ssin_h:	.ascii	"0."
 ssin_l:	.ascii	"000000000\n"
 lssin = . - ssin
 
-cnt_answer:	.ascii "cycles\t"
-cnt:	.ascii "    \n"
-lcnt = . - cnt_answer	
+scyc:	.ascii "cycles\t"
+scycc:	.ascii "      \n"
+lscyc = . - scyc
 
 .align 4
 _pi:	.long	0
+
+
+
 
 .text
 .globl _start
@@ -217,7 +219,7 @@ get_digit:
 #	integer print from lectures
 cycles:
 	mov	%r10,	%rax
-	mov	$cnt,	%rdi
+	mov	$scycc,	%rdi
 	xor	%rcx,	%rcx	
 1:
 	xor	%rdx,	%rdx
@@ -232,8 +234,8 @@ cycles:
 	stosb
 	dec	%ecx
 	jnz	2b
-	mov	$cnt_answer,	%rsi
-	mov	$lcnt,		%rdx
+	mov	$scyc,	%rsi
+	mov	$lscyc,	%rdx
 	call	print
 	ret
 
