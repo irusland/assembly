@@ -35,16 +35,16 @@ len = . - 99b
 _start:
 	pop	%rbx
 	cmp	$1,	%ebx
-	jne	has_arg
+	jne	1f
 	printstr "Input x\n"
 	jmp	exit
 
-has_arg:	
+1:	
 	pop 	%rsi
 	pop	%rsi
 	call 	read_arg
-	call	convert
-	call	sinus
+	call	to_radians
+	call	sin		# %xmm0 = sin(x)	cycles = %r10
 	call	print_sinus
 	call	print_count
 
@@ -66,31 +66,30 @@ read_char:
 	test	%al,	%al
 	jz	correct
 	cmp	$0x30,	%al
-	jb	error
+	jb	1f
 	cmp	$0x39,	%al
-	ja	error
+	ja	1f
 	sub	$0x30,	%eax
 	mov	%eax,	%ecx
 	pop	%rax
 	mul	%ebx
 	add	%ecx,	%eax
-	cmp	$90,	%eax	
-	jbe	read_char
-error:
+	cmp	$91,	%eax	
+	jb	read_char
+1:
 	printstr	"x in [0, 90]\n"
-	jmp	exit	
+	jmp	exit
 	
 correct:
 	pop	%rax
 	ret
 
-#------------------------------
 
-convert:
+#	%eax degrees -> %xmm0 radians
+to_radians:
 	finit
 	fldpi
 	fst	_pi	
-
 	movss	_pi,	%xmm1
 	cvtsi2ss %eax,	%xmm0
 	mov	$180,	%eax
@@ -99,9 +98,8 @@ convert:
 	divss	%xmm2,	%xmm0
 	ret
 
-#------------------------------
 
-sinus:
+sin:
 
 #	taylor sum
 	mov	$0,	%rax
@@ -184,7 +182,7 @@ get_digit:
         mov     $10,    %r12
 	xor     %rdx,   %rdx
 	div     %r12
-	add     $48,  %dl
+	add     $0x30,  %dl
 	ret
 
 
