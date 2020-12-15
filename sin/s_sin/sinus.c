@@ -2,7 +2,10 @@
 float sinus(int x);
 
 int main(void) {
-        printf("X = %.*f\n", 9, sinus(1));
+	int x;
+	x = 30;
+	printf("x = %i\n", x);
+        printf("sin(x) = %.*f\n", 9, sinus(x));
         return 0;
 }
 

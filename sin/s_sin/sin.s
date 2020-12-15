@@ -9,12 +9,14 @@ sinus:
 	fldpi
 	fst	_pi
 	movss	_pi,	%xmm0
-	mov	$1,	%rdx
+	mov	$180,	%rdx
 	cvtsi2ss	%rdx,	%xmm1
-
+#	pi/180
 	divss	%xmm1,	%xmm0
-#	x
-#	cvtsi2ss	%edi,	%xmm0
+#	degrees
+	cvtsi2ss	%edi,	%xmm8
+#	radians
+	mulss	%xmm8,	%xmm0
 
 #	taylor sum
 	mov	$0,	%rax
@@ -63,8 +65,9 @@ for:
 	movss	%xmm1,	%xmm7
 	jnz	for
 
-	cvtsi2ss	%rcx,	%xmm0
-	ret
+#	cycles only
+#	cvtsi2ss	%rcx,	%xmm0
+#	ret
 	
 	movss	%xmm9,	%xmm0
 	ret
