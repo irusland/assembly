@@ -1,34 +1,22 @@
 .data
-answer:	.ascii "sin(x)\t"
-int:	.ascii "0."
-fract:	.ascii "000000000\n"
+
+no_x:	.ascii	"Input x\n"
+lno_x = . - no_x
+
+x_in:	.ascii	"x in [0, 90]\n"
+lx_in = . - x_in
+
+answer:	.ascii	"sin(x)\t"
+int:	.ascii	"0."
+fract:	.ascii	"000000000\n"
 lans = . - answer
+
 cnt_answer:	.ascii "cycles\t"
 cnt:	.ascii "    \n"
 lcnt = . - cnt_answer	
 
 .align 4
 _pi:	.long	0
-
-.nolist
-
-.macro print straddr strlen
-	mov	$1,	%rax
-	mov	%rax,	%rdi
-	mov	$\straddr,	%rsi
-	mov	$\strlen,	%rdx
-	syscall
-.endm
-
-.macro printstr str
-.data
-99:	.ascii "\str"
-len = . - 99b
-.text
-	print 99b len
-.endm
-.list
-
 
 .text
 .globl _start
@@ -39,7 +27,10 @@ _start:
 #	check if exists
 	cmp	$1,	%eax
 	jne	1f
-	printstr "Input x\n"
+	
+        mov	$no_x,	%rsi
+	mov	$lno_x,	%rdx
+	call	print
 	jmp	exit
 
 1:
@@ -56,6 +47,13 @@ exit:
 	mov     $0,	%edi
 	mov     $60,    %eax
 	syscall
+
+
+print:
+	mov	$1,	%rax
+	mov	$1,	%rdi
+	syscall
+	ret
 
 
 parse:
@@ -80,7 +78,9 @@ step:
 	cmp	$91,	%eax	
 	jb	step
 1:
-	printstr	"x in [0, 90]\n"
+	mov	$x_in,	%rsi
+	mov	$lx_in,	%rdx
+	call	print
 	jmp	exit
 	
 correct:
@@ -176,7 +176,9 @@ print_sinus:
 	call	get_digit	
 	mov	%dl,	int
 
-	print	answer, lans
+	mov	$answer,	%rsi
+	mov	$lans,		%rdx
+	call	print
 	ret
 
 
@@ -207,6 +209,8 @@ print_count:
 	stosb
 	dec	%ecx
 	jnz	2b
-	print 	cnt_answer, lcnt
+	mov	$cnt_answer,	%rsi
+	mov	$lcnt,		%rdx
+	call	print
 	ret
 
