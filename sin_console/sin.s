@@ -33,34 +33,36 @@ len = . - 99b
 .text
 .globl _start
 _start:
+#	argument validation
 	pop	%rax
+
+#	check if exists
 	cmp	$1,	%eax
 	jne	1f
 	printstr "Input x\n"
 	jmp	exit
 
-1:	
+1:
+
 	pop 	%rax
 	pop	%rax
-	call 	read_arg
+	call 	parse
 	call	to_radians
 	call	sin		# %xmm0 = sin(x)	cycles = %r10
 	call	print_sinus
 	call	print_count
 
 exit:
-	mov     $0,  %edi
+	mov     $0,	%edi
 	mov     $60,    %eax
 	syscall
 
 
-#------------------------------
-
-read_arg:
+parse:
 	mov	%rax,	%rsi
 	xor	%eax,	%eax
 	mov	$10,	%ebx
-read_char:
+step:
 	push	%rax
 	xor	%eax,	%eax
 	lodsb
@@ -76,7 +78,7 @@ read_char:
 	mul	%ebx
 	add	%ecx,	%eax
 	cmp	$91,	%eax	
-	jb	read_char
+	jb	step
 1:
 	printstr	"x in [0, 90]\n"
 	jmp	exit
