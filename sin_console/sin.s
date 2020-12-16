@@ -27,7 +27,7 @@ _start:
 	pop	%rax
 
 #	check if exists
-	cmp	$1,	%eax
+	cmp	$1,	%rax
 	jne	1f
 
 #	print error info
