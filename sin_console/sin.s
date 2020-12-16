@@ -1,17 +1,17 @@
 .data
-no_x:	.ascii	"ArgumentNullException\n"
+no_x:	.ascii	"ArgumentNullException", "\n"
 lno_x = . - no_x
 
-x_in:	.ascii	"ArgumentOutOfRangeException\n"
+x_in:	.ascii	"ArgumentOutOfRangeException", "\n"
 lx_in = . - x_in
 
-ssin:	.ascii	"sin(x)\t"
-ssin_h:	.ascii	"0."
-ssin_l:	.ascii	"000000000\n"
+ssin:	.ascii	"sin(x)", "\t"
+ssin_h:	.ascii	"0", ","
+ssin_l:	.ascii	"000000000", "\n"
 lssin = . - ssin
 
-scyc:	.ascii "cycles\t"
-scycc:	.ascii "      \n"
+scyc:	.ascii "cycles", "\t"
+scycc:	.ascii "      ", "\n"
 lscyc = . - scyc
 
 .align 4
