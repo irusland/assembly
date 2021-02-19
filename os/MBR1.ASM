@@ -34,28 +34,87 @@ _start:
 @@1:
 	xor	ah,	ah		; ROM BIOS 00h interrupt
 	int	16h			; read charnum -> ah, char -> al
-	mov	ah,	08eh	; ah color
-					; al char
+	; ah color
+	; al char
+	cmp al,	0
+	je	@ascii_extend
+
 	cmp	al,	1bh		; esc
 	je	@reboot
 
 	cmp al,	08h		; backspace
 	je	@cls
-
-	stosw 			; ax -> es:di
+	
+	call draw_char 		
 	jmp	@@1
+
+
+del_color:
+	mov	ah,	007h
+	ret
+
+draw_char:
+	mov	ah,	070h
+	stosw ; ax -> es:di
+	ret
+
+clear_char:
+	dec di
+	dec di
+	mov	al,	0
+	call del_color
+	stosw
+	dec di
+	dec di
+	ret
+
 @reboot:
 	xor	ah,	ah
 	int	19h
 	jmp @@1
+
 @cls:
-	dec di
-	dec di
-	mov	al,	0
-	stosw
-	dec di
-	dec di
+	call clear_char
 	jmp @@1
+
+@ascii_extend:
+	cmp ah,	48h
+	je	@up
+	cmp ah,	50h
+	je	@down
+	cmp ah,	4dh
+	je	@right
+	cmp ah,	4bh
+	je	@left
+	jmp @@1
+
+@up:
+	sub	di,	162
+	xor al,	al
+	mov	ah,	070h
+	stosw ; ax -> es:di
+	jmp @@1
+
+@down:
+	add	di,	158
+	xor al,	al
+	mov	ah,	070h
+	stosw ; ax -> es:di
+	jmp @@1
+
+@right:
+	xor al,	al
+	mov	ah,	070h
+	stosw ; ax -> es:di
+	jmp @@1
+
+@left:
+	sub	di, 4
+	xor al,	al
+	mov ah, 070h
+	stosw
+	jmp @@1
+
 org	766
 dw	0aa55h
 end begin
