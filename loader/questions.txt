@@ -1,0 +1,3 @@
+что за код после jmp far
+
+tlink warning no stack
