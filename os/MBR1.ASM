@@ -91,28 +91,24 @@ clear_char:
 @up:
 	sub	di,	162
 	xor al,	al
-	mov	ah,	070h
-	stosw ; ax -> es:di
+	call draw_char
 	jmp @@1
 
 @down:
 	add	di,	158
 	xor al,	al
-	mov	ah,	070h
-	stosw ; ax -> es:di
+	call draw_char
 	jmp @@1
 
 @right:
 	xor al,	al
-	mov	ah,	070h
-	stosw ; ax -> es:di
+	call draw_char
 	jmp @@1
 
 @left:
 	sub	di, 4
 	xor al,	al
-	mov ah, 070h
-	stosw
+	call draw_char
 	jmp @@1
 
 org	766
