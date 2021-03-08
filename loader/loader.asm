@@ -48,9 +48,9 @@ _start:
     mov ax, 3000h
     cli ; clear interrupt enable flag
     ; CS register cannot be changed directly. The CS register is automatically updated during far jump, far call and far return instructions.
-    mov es, ax
-    mov ds, ax
-    mov ss, ax
+    mov es, ax  ; ? 
+    mov ds, ax  ; ?
+    mov ss, ax  ; ? 
     mov sp, 0
     push sp ; уменьшает указатель стека SP на 2 для 16-битного размера операнда 
             ; 0 - 2 = 0xFFFE
@@ -72,13 +72,20 @@ _start:
 db  0eah, 0, 1, 0, 30h  ; jmp far ptr 3000:100  ; sets CS:IP = 3000:100
 
     ; same 
-    mov si, offset d1   ; ds:si
+    mov ax, 0
+    mov ds, ax
+    mov si, offset reload   ; ds:si
+
+    mov ax, 3000h
+    mov es, ax 
     mov di, 0           ; es:di
     mov cx, 5
+    cld
     rep movsb ; es:di <- ds:si
 
 .data
-d1  db  0eah, 0, 07ch, 0, 0     ; jmp far ptr 0:7c00
+reload  db  0eah, 0, 07ch, 0, 0         ; jmp far ptr 0:7c00
+reboot  db  0eah, 0, 0, 0ffh, 0ffh     ; jmp far ptr 0:fff
 d2  db  0eah, 0, 1, 0, 30h      ; jmp far ptr 3000:100
 
 org	766
