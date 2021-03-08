@@ -4,3 +4,7 @@ peda-session*
 *.sh
 *.swp
 .idea
+*.obj
+*.map
+*.lst
+*.exe
