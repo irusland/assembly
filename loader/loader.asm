@@ -27,6 +27,13 @@ DiskLabel	db 'TestMBRdisk'
 FATtype		db 'FAT12   '
 ;
 _start:
+    mov	ax, 0b800h
+	mov	es, ax
+	mov	di, 360 ; screen char position
+    mov	ah,	060h
+    mov al, 39h
+	stosw ; ax -> es:di
+
     mov ah, 02h ; int 13 02h
     mov al, 18  ; number of sectors to read
     mov ch, 2   ; cylinder/track number 
@@ -49,14 +56,8 @@ _start:
             ; 0 - 2 = 0xFFFE
     sti ; set int
 
-
-db  0eah, 0, 1, 0, 30h  ; jmp far ptr 3000:100  ; sets CS:IP = 3000:100
-
-    mov si, offset d1   ; ds:si
-    mov di, 0           ; es:di
-    mov cx, 5
-    rep movsb
-
+    ; write at 3000:0 command jmp far 07c0h for reload
+    mov di, 0
     mov al, 0eah
     stosb
     mov al, 0
@@ -66,8 +67,13 @@ db  0eah, 0, 1, 0, 30h  ; jmp far ptr 3000:100  ; sets CS:IP = 3000:100
     mov ax, 0
     stosw
 
-    mov ah, 4ch 
-    int 21h
+db  0eah, 0, 1, 0, 30h  ; jmp far ptr 3000:100  ; sets CS:IP = 3000:100
+
+    ; same 
+    mov si, offset d1   ; ds:si
+    mov di, 0           ; es:di
+    mov cx, 5
+    rep movsb ; es:di <- ds:si
 
 .data
 d1  db  0eah, 0, 07ch, 0, 0     ; jmp far ptr 0:7c00
