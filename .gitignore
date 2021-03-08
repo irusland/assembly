@@ -8,3 +8,4 @@ peda-session*
 *.map
 *.lst
 *.exe
+.DS_Store
