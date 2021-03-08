@@ -62,10 +62,12 @@ _start:
     stosb
     mov al, 0
     stosb
-    mov al, 07ch
+    mov al, 0
     stosb
-    mov ax, 0
-    stosw
+    mov ax, 0ffh
+    stosb
+    mov ax, 0ffh
+    stosb
 
 db  0eah, 0, 1, 0, 30h  ; jmp far ptr 3000:100  ; sets CS:IP = 3000:100
 
