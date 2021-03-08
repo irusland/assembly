@@ -21,5 +21,5 @@ with open(img, 'wb') as f:
             start = sectors * capacity * tracks_per_file * i
             f.seek(start)
             f.write(binary)
-            print(f'{path} -> {img}[{i}] ({start}:{len(binary)})')
+            print(f'{path} -> {img}[{i * tracks_per_file}] ({start}:{len(binary)})')
     print(f'{img} image created, size {os.stat(img).st_size}B')

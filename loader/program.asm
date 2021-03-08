@@ -2,6 +2,10 @@
 .code
 org 100h
 _start:
+
+    xor	ah,	ah
+	int	19h ; reload
+
 	cld
 	mov	ax, 0b800h
 	mov	es, ax

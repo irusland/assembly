@@ -1,11 +1,36 @@
 .model tiny
 .code
-org 100h ; address on startup will point 7c00 so we start our loader from here
+org 100h
+begin:
+	jmp short _start
+	nop
+operator	db 'MBR.180K'
+; BPB
+BytesPerSec	dw 200h
+SectPerClust	db 1
+RsvdSectors	dw 1
+NumFATs		db 2
+RootEntryCnt	dw 64		; 2 ᥪ�� �� root dir
+TotalSectors	dw 360	
+MediaByte	db 0FCh		; 1 ������ 9 ᥪ�஢ 40 樫���஢
+FATsize		dw 2		; 2 ᥪ�� �� ����� FAT
+SecPerTrk	dw 9
+NumHeads	dw 1
+HidSec		dw 0, 0
+TotSec32	dd 0
+DrvNum		db 0
+Reserved	db 0
+Signatura	db ')'		; 29h
+; 
+Vol_ID		db 'XDRV'
+DiskLabel	db 'TestMBRdisk'
+FATtype		db 'FAT12   '
+;
 _start:
     mov ah, 02h ; int 13 02h
     mov al, 18  ; number of sectors to read
     mov ch, 2   ; cylinder/track number 
-    mov cl, 0   ; starting sector number
+    mov cl, 1   ; starting sector number
     mov dh, 0   ; head number
     mov dl, 0   ; drive number
     mov bx, 3000h
@@ -23,6 +48,7 @@ _start:
     push sp ; уменьшает указатель стека SP на 2 для 16-битного размера операнда 
             ; 0 - 2 = 0xFFFE
     sti ; set int
+
 
 db  0eah, 0, 1, 0, 30h  ; jmp far ptr 3000:100  ; sets CS:IP = 3000:100
 
@@ -47,4 +73,6 @@ db  0eah, 0, 1, 0, 30h  ; jmp far ptr 3000:100  ; sets CS:IP = 3000:100
 d1  db  0eah, 0, 07ch, 0, 0     ; jmp far ptr 0:7c00
 d2  db  0eah, 0, 1, 0, 30h      ; jmp far ptr 3000:100
 
-end _start
+org	766
+dw	0aa55h
+end begin
