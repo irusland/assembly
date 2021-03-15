@@ -46,13 +46,22 @@ _start:
 	mov	di, 660     ; screen char position
 
     mov dx, ax       ; Set the value we want to print to dx
-    ; mov dx, 01b0fh       ; Set the value we want to print to dx
+    ; mov dx, 001ab2h       ; Set the value we want to print to dx
     ccall print_hex    ; Print the hex value
+    
+    ccall add_char
+    ccall print_string
 
 	jmp	@@1
 
 @return:
 	ret
+
+add_char:
+    mov bx, offset HEX_OUT   ; print the string pointed to by bx
+    add bx, 7
+    mov byte [bx], al
+    ret
 
 ;--------------------------------------------------------
 print_hex:
@@ -68,36 +77,38 @@ char_loop:
     and ax,0fh        ; mask ah to get the last 4 bits
 
     mov bx, offset HEX_OUT   ; set bx to the memory address of our string
-    add bx, 2         ; skip the '0x'
+    
+    add bx, 1         ; skip the '> '
+    cmp cx, 2
+    jae skip
+continue:
+
     add bx, cx        ; add the current counter to the address
 
     cmp ax, 0ah        ; Check to see if it's a letter or number
     jl set_letter     ; If it's a number, go straight to setting the value
-    add al, 27h   ; If it's a letter, add 7
-                    ; Why this magic number? ASCII letters start 17
-                    ; characters after decimal numbers. We need to cover that
-                    ; distance. If our value is a 'letter' it's already
-                    ; over 10, so we need to add 7 more.
-    jl set_letter
+    add al, 27h
+    jmp set_letter
+
+skip:
+    add bx, 1
+    jmp continue
+
 
 set_letter:
     add al, 030h      ; For and ASCII number, add 0x30
-    mov byte [bx], al  ; Add the value of the byte to the char at bx
+    mov byte [bx], al  ;  the value of the byte to the char at bx
 
     cmp cx, 0          ; check the counter, compare with 0
     je print_hex_done ; if the counter is 0, finish
     jmp char_loop     ; otherwise, loop again
 
 print_hex_done:
-    mov bx, offset HEX_OUT   ; print the string pointed to by bx
-    ccall print_string
-
-;    popa              ; pop the initial register values back from the stack
     ret               ; return the function
 
 ;--------------------------------------------------------
 print_string:     ; Push registers onto the stack
-;    pusha
+    mov bx, offset HEX_OUT   ; print the string pointed to by bx
 
 string_loop:
     mov al, [bx]    ; Set al to the value at bx
@@ -119,6 +130,6 @@ draw_char:
 ;--------------------------------------------------------
 .data
 ; global variables
-HEX_OUT: db '0x0000 ',0
+HEX_OUT: db '> __ __ =',0
 
 end _start
