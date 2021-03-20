@@ -114,6 +114,45 @@ ll:
     mov cl, 0bah ; =
     call vline
 
+; corners _________
+    mov al, 0c9h ; left upper
+    mov di, 0
+    call draw_char
+    
+    mov al, 0c7h ; left middle
+    mov di, 160 * 2
+    call draw_char
+
+    mov al, 0c8h ; left bottom
+    mov di, 160 * 19
+    call draw_char
+
+
+    mov al, 0bbh ; right upper
+    mov di, 19 * 2
+    call draw_char
+    
+    mov al, 0b6h ; right middle
+    mov di, 160 * 2 + 19 * 2
+    call draw_char
+
+    mov al, 0bch ; right bottom
+    mov di, 160 * 19 + 19 * 2
+    call draw_char
+
+    ; mid
+    mov al, 0d1h ; upper
+    mov di, 2 * 2
+    call draw_char
+    
+    mov al, 0c5h ; middle
+    mov di, 160 * 2 + 2 * 2
+    call draw_char
+
+    mov al, 0cfh ; bottom
+    mov di, 160 * 19 + 2 * 2
+    call draw_char
+    
 
 ; ESC __________
 	xor	ah,	ah		; ROM BIOS 00h interrupt
@@ -125,11 +164,12 @@ ll:
 @return:
 	ret
 
-hline: ; cl: char  |  si: skip
+; cl: char  |  si: skip
+hline:
     xor dx, dx
     mov bx, 2
     jmp line
-vline: ; cl: char  |  si: skip
+vline:
     xor dx, dx
     mov bx, 160
 line:
@@ -145,51 +185,6 @@ line:
     cmp dx, 20
     jl line
     ret
-
-
-
-
-
-
-
-
-
-
-
-; hline: ; cl: char  |  si: skip
-;     xor dx, dx
-; @3:
-;     mov ax, 2
-;     mul dl
-;     mov di, ax ; point
-;     add di, si
-
-;     mov al, cl
-;     call draw_char
-
-;     inc dx    
-;     cmp dx, 20
-;     jl @3
-;     ret
-
-; vline: ; cl: char  |  si: skip
-;     xor dx, dx
-; @4:
-;     mov ax, 160
-;     mul dl
-;     mov di, ax ; point
-;     add di, si
-
-;     mov al, cl
-;     call draw_char
-
-;     inc dx    
-;     cmp dx, 20
-;     jl @4
-;     ret
-
-
-
 
 
 draw_dig:
