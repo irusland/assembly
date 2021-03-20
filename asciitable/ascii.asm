@@ -19,9 +19,9 @@ ll:
     MUL bl  ; Теперь АХ = AL * BL
 
     mov di, ax
-    add di, 6 + 160*3 ; skip 3 lines and chars 3
+    add di, 4*2 + 160*3 ; skip 3 lines and chars 3
 
-    mov ax, 2
+    mov ax, 2 * 2
     mul dl
     add di, ax ; point
 
@@ -32,6 +32,7 @@ ll:
     add ax, dx
 
     call draw_char
+    call draw_char
 
     inc dx    
     cmp dx, 16
@@ -41,6 +42,13 @@ ll:
 ; CHARS --------------------
 
 
+; void filler --------------------
+    mov si, 3*2
+    mov cl, 0h
+    call vline
+    mov si, 1*2
+    call vline
+; void filler --------------------
 
 ; ROW DIGITS --------------------
     xor dx, dx
@@ -48,15 +56,16 @@ ll:
     mov ax, 160   ;  00a0h
 
     mov di, ax
-    add di, 3*2 ; skip 3
+    add di, 4*2 ; skip 3
 
-    mov ax, 2
+    mov ax, 2 * 2
     mul dl
     add di, ax ; point
 
     mov ax, dx
 
     call draw_dig
+    call draw_char
 
     inc dx    
     cmp dx, 16
@@ -92,13 +101,19 @@ ll:
     xor si, si
     mov cl, 0cdh ; =
     call hline
+    mov si, 34
+    call hline
 
     mov si, 160 * 2 ; 
     mov cl, 0c4h ; -
     call hline
+    mov si, 160 * 2 + 34
+    call hline
 
     mov si, 160 * 19 ; 
     mov cl, 0cdh ; =
+    call hline
+    mov si, 160 * 19 + 34
     call hline
 
 ; vertical lines _________
@@ -110,7 +125,7 @@ ll:
     mov cl, 0b3h ; -
     call vline
 
-    mov si, 19 * 2 ; 
+    mov si, 19 * 2 + 34; 
     mov cl, 0bah ; =
     call vline
 
@@ -128,16 +143,17 @@ ll:
     call draw_char
 
 
-    mov al, 0bbh ; right upper
-    mov di, 19 * 2
+    ; right
+    mov al, 0bbh ; upper
+    mov di, 19 * 2 + 34
     call draw_char
     
-    mov al, 0b6h ; right middle
-    mov di, 160 * 2 + 19 * 2
+    mov al, 0b6h ; middle
+    mov di, 160 * 2 + 19 * 2 + 34
     call draw_char
 
-    mov al, 0bch ; right bottom
-    mov di, 160 * 19 + 19 * 2
+    mov al, 0bch ; bottom
+    mov di, 160 * 19 + 19 * 2 + 34
     call draw_char
 
     ; mid
@@ -152,7 +168,6 @@ ll:
     mov al, 0cfh ; bottom
     mov di, 160 * 19 + 2 * 2
     call draw_char
-    
 
 ; ESC __________
 	xor	ah,	ah		; ROM BIOS 00h interrupt
@@ -195,6 +210,10 @@ draw_dig:
 draw_char:
 	mov	ah,	070h
 	stosw ; ax -> es:di
+    xor ax, ax
 	ret
+
+.data
+shift dw 0030
 
 end _start
