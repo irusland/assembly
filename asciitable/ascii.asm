@@ -65,7 +65,6 @@ ll:
 
 
 ; COL DIGITS --------------------
-
     xor dx, dx
 @2:
     mov ax, 158   ;  00a0h
@@ -85,13 +84,38 @@ ll:
     inc dx    
     cmp dx, 16
     jl @2
-    
-
 ; COL DIGITS --------------------
 
 
 
+; horizontal lines _________
+    xor si, si
+    mov cl, 0cdh ; =
+    call hline
 
+    mov si, 160 * 2 ; 
+    mov cl, 0c4h ; -
+    call hline
+
+    mov si, 160 * 19 ; 
+    mov cl, 0cdh ; =
+    call hline
+
+; vertical lines _________
+    xor si, si
+    mov cl, 0bah ; =
+    call vline
+
+    mov si, 2 * 2 ; 
+    mov cl, 0b3h ; -
+    call vline
+
+    mov si, 19 * 2 ; 
+    mov cl, 0bah ; =
+    call vline
+
+
+; ESC __________
 	xor	ah,	ah		; ROM BIOS 00h interrupt
 	int	16h			; read charnum -> ah, char -> al
 
@@ -100,6 +124,73 @@ ll:
 
 @return:
 	ret
+
+hline: ; cl: char  |  si: skip
+    xor dx, dx
+    mov bx, 2
+    jmp line
+vline: ; cl: char  |  si: skip
+    xor dx, dx
+    mov bx, 160
+line:
+    mov ax, bx
+    mul dl
+    mov di, ax ; point
+    add di, si
+
+    mov al, cl
+    call draw_char
+
+    inc dx    
+    cmp dx, 20
+    jl line
+    ret
+
+
+
+
+
+
+
+
+
+
+
+; hline: ; cl: char  |  si: skip
+;     xor dx, dx
+; @3:
+;     mov ax, 2
+;     mul dl
+;     mov di, ax ; point
+;     add di, si
+
+;     mov al, cl
+;     call draw_char
+
+;     inc dx    
+;     cmp dx, 20
+;     jl @3
+;     ret
+
+; vline: ; cl: char  |  si: skip
+;     xor dx, dx
+; @4:
+;     mov ax, 160
+;     mul dl
+;     mov di, ax ; point
+;     add di, si
+
+;     mov al, cl
+;     call draw_char
+
+;     inc dx    
+;     cmp dx, 20
+;     jl @4
+;     ret
+
+
+
+
 
 draw_dig:
     add al, 30h
