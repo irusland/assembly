@@ -50,50 +50,17 @@ ll:
     call vline
 ; void filler --------------------
 
-; ROW DIGITS --------------------
-    xor dx, dx
-@1:
-    mov ax, 160   ;  00a0h
 
-    mov di, ax
-    add di, 4*2 ; skip 3
-
-    mov ax, 2 * 2
-    mul dl
-    add di, ax ; point
-
-    mov ax, dx
-
-    call draw_dig
-    call draw_char
-
-    inc dx    
-    cmp dx, 16
-    jl @1
-; ROW DIGITS --------------------
-
-
-; COL DIGITS --------------------
-    xor dx, dx
-@2:
-    mov ax, 158   ;  00a0h
-    MUL dl
-
-    mov di, ax
-    add di, 1*2 + 160 * 3 ; skip 1 char 3 lines
-
-    mov ax, 2
-    mul dl
-    add di, ax ; point
-
-    mov ax, dx
-
-    call draw_dig
-
-    inc dx    
-    cmp dx, 16
-    jl @2
-; COL DIGITS --------------------
+; DIGITS ----------------
+; row
+mov cx, 2 * 2 ; shift
+mov si, 4*2 + 160 ; skip
+call names
+; col
+mov cx, 160
+mov si, 1*2 + 160 * 3 
+call names
+; DIGITS --------------------
 
 
 
@@ -179,8 +146,26 @@ ll:
 @return:
 	ret
 
-; cl: char  |  si: skip
-hline:
+names: ; cx: shift  |  si: skip
+    xor dx, dx
+@1:
+    mov ax, cx ; shift
+    mul dl
+    mov di, ax ; point
+
+    add di, si; skip
+
+    mov ax, dx
+
+    call draw_dig
+    call draw_char
+
+    inc dx    
+    cmp dx, 16
+    jl @1
+    ret
+
+hline: ; cl: char  |  si: skip
     xor dx, dx
     mov bx, 2
     jmp line
