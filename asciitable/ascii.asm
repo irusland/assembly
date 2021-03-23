@@ -9,36 +9,32 @@ _start:
 @@1:
 
 ; CHARS --------------------
-mov cx, 16
+; cs shift relative
+; bx base symbol
+; ss switch symbol? (> 10 => ABCDEF)
+; si skip base
+
+mov ax, 2 * 2
+mov ds, ax
+; mov bx, 2 * 2
+mov word [switch_symbol], 0 ; no switch
+
+xor cx, cx
 l: 
-    xor dx, dx
-ll:
     mov ax, 160   ;  00a0h
-    MOV bl, 16
-    sub bl, cl
-    MUL bl  ; Теперь АХ = AL * BL
+    MUL cl  ; Теперь АХ = AL * BL
+    mov si, 4*2 + 160*3
+    add si, ax
 
-    mov di, ax
-    add di, 4*2 + 160*3 ; skip 3 lines and chars 3
-
-    mov ax, 2 * 2
-    mul dl
-    add di, ax ; point
-
-    MOV bl, 16
-    sub bl, cl
     mov ax, 16
-    mul bl
-    add ax, dx
+    mul cl
+    mov bx, ax; loop inc
 
-    call draw_char
-    call draw_char
+    call draw_iter_char
 
-    inc dx    
-    cmp dx, 16
-    jl ll
-    
-    loop l
+    inc cx    
+    cmp cx, 16
+    jl l
 ; CHARS --------------------
 
 
@@ -52,6 +48,7 @@ ll:
 
 
 ; DIGITS ----------------
+mov [switch_symbol], 1
 ; row
 mov cx, 2 * 2 ; shift
 mov si, 4*2 + 160 ; skip
@@ -165,6 +162,31 @@ names: ; cx: shift  |  si: skip
     jl @1
     ret
 
+
+; cs shift relative
+; bx base symbol
+; ss switch symbol? (> 10 => ABCDEF)
+; si skip base
+draw_iter_char:
+    xor dx, dx
+ll:
+    mov di, si ; skip
+
+    mov ax, ds
+    mul dl
+    add di, ax ; point
+
+    mov ax, bx
+    add ax, dx
+
+    call draw_dig
+    call draw_char
+
+    inc dx    
+    cmp dx, 16
+    jl ll
+    ret
+
 hline: ; cl: char  |  si: skip
     xor dx, dx
     mov bx, 2
@@ -188,6 +210,9 @@ line:
 
 
 draw_dig:
+    cmp [switch_symbol], 0 ; switch symbol
+    je draw_char
+
     add al, 30h
     cmp al, 3ah
     jl draw_char
@@ -198,7 +223,8 @@ draw_char:
     xor ax, ax
 	ret
 
-.data
-shift dw 0030
+; .data
+switch_symbol dw 0
+shift_relative dw 0
 
 end _start
