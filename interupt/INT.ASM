@@ -44,7 +44,7 @@ tail	dw	offset buffer
 old_di dw 0
 
 
-line_str db '--------', 0
+line_str db '-------------------', 0
 
 screen_width equ 160
 base_line equ 10
@@ -62,11 +62,15 @@ my_int proc near
 	mov cx, ds
 	mov es, cx ; ВОТ В ЧЕМ БЫЛА ПРОБЛЕМА es 0000 а ds 6028
 
+	mov si, offset got_new
+	lodsb ; al <- DS:SI
 	mov di, offset got_new
-	mov al, 1
+	inc ax
 	stosb ; al -> es:di
 
-	mov di, offset buffer ; addr of buffer
+	mov di, offset buffer; addr of buffer
+	; dec di
+	; add di, ax
 	
 	; in al, 64h ; al <- port   ввод порта PB
 	; stosb ; al -> es:di
@@ -128,7 +132,7 @@ begin proc near
 	je @@1 
 	
 	mov di, offset got_new
-	mov al, 0
+	dec al
 	mov bx, ds
 	mov es, bx
 	stosb ; al -> es:di
@@ -138,27 +142,35 @@ begin proc near
 	mov	di, screen_width * base_line ; screen char position
 
 
-	cli
-	ccall newline
-	sti
-
+	; xor bx, bx
+	; mov bl, al
 	mov si, offset buffer
+	; inc si
+	; add si, bx
+
+
 	lodsb ; AX <- DS:SI
 	xchg al, ah
 	mov dx, ax
 	ccall to_hex
 	ccall print_hex
 	mov bl, ah
-    mov	ah,	060h
-	stosw ; ax -> es:di	
+    ; mov	ah,	060h
+	; stosw ; ax -> es:di	
     mov	ah,	060h
 	mov al, bl
 	stosw ; ax -> es:di	
 
+	cli
+	ccall newline
+	sti
+
 	pop es
-	mov di, screen_width * (base_line + 1)
-	cmp	al,	39h		 ; -------------
-	; je prt_line
+	; mov di, screen_width * (base_line + 1)
+	cmp	al,	0b9h		 ; -------------
+	je prt_line
+	cmp	al,	039h		 ; -------------
+	je prt_line
 
 	cmp	al,	1		 ; esc
 	jnz	@@1
@@ -300,6 +312,6 @@ line:
 
 .data
 ; global variables
-HEX_OUT: db '> __ __', 0
+HEX_OUT: db '> __',0,'__', 0
 
 end _start
