@@ -42,16 +42,28 @@ head	dw	offset buffer
 tail	dw	offset buffer
 
 old_di dw 0
+
+
+line_str db '--------', 0
+
+screen_width equ 160
+base_line equ 10
+
+
 my_int proc near
 
 	push ax
 	push di
 	push es
-	in al, 60h ; scan from Key board
 	mov di, offset buffer ; addr of buffer
 	mov cx, ds
 	mov es, cx ; ВОТ В ЧЕМ БЫЛА ПРОБЛЕМА es 0000 а ds 6028
-	stosb ; -> es:di
+	
+	
+	in al, 64h ; al <- port   ввод порта PB
+	stosb ; al -> es:di
+	in al, 60h ; scan from Key board
+	stosb ; al -> es:di
 
 	pop	es
 	pop di
@@ -96,25 +108,31 @@ begin proc near
 	hlt ; TODO HALT FOR SLEEP
 	; int 9h
 	
-	
-	mov si, offset buffer
-	lodsb ; al <- DS:SI
-
 	push es
 	mov	bx, 0b800h
 	mov	es, bx
-	mov	di, 720 ; screen char position
-    mov	ah,	060h
-    ; mov al, 39h
-	stosw ; ax -> es:di	
+	mov	di, screen_width * base_line ; screen char position
+
+	
+	mov si, offset buffer
+	lodsw ; AX <- DS:SI
 	mov dx, ax
 	ccall to_hex
 	ccall print_hex
+	mov bl, ah
+    mov	ah,	060h
+	stosw ; ax -> es:di	
+    mov	ah,	060h
+	mov al, bl
+	stosw ; ax -> es:di	
 
-	pop es
-	
+	mov di, screen_width * (base_line + 1)
+	cmp	al,	20		 ; -------------
+	ccall line
+
 	cmp	al,	1		 ; esc
-	
+
+	pop es	
 	jnz	@@1
 ;
 	mov	di,	4*vector
@@ -212,8 +230,14 @@ draw_char:
 	stosw ; ax -> es:di
 	ret
 ;--------------------------------------------------------
+
+
+line:
+    mov bx, offset line_str   ; print the string pointed to by bx
+	jmp string_loop
+
 .data
 ; global variables
-HEX_OUT: db '> __ __ =',0
+HEX_OUT: db '> __ __', 0
 
 end _start
