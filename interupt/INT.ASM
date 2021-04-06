@@ -49,6 +49,8 @@ line_str db '--------', 0
 screen_width equ 160
 base_line equ 10
 
+screen_height equ 32
+
 
 my_int proc near
 
@@ -60,9 +62,12 @@ my_int proc near
 	mov es, cx ; ВОТ В ЧЕМ БЫЛА ПРОБЛЕМА es 0000 а ds 6028
 	
 	
-	in al, 64h ; al <- port   ввод порта PB
+	; in al, 64h ; al <- port   ввод порта PB
+	; stosb ; al -> es:di
+	in ax, 60h ; scan from Key board
+	xchg al, ah
 	stosb ; al -> es:di
-	in al, 60h ; scan from Key board
+	xchg al, ah
 	stosb ; al -> es:di
 
 	pop	es
@@ -107,7 +112,7 @@ begin proc near
 @@1:
 	hlt ; TODO HALT FOR SLEEP
 	; int 9h
-	
+	cli
 	push es
 	mov	bx, 0b800h
 	mov	es, bx
@@ -130,9 +135,12 @@ begin proc near
 	cmp	al,	20		 ; -------------
 	ccall line
 
+	ccall newline
+
 	cmp	al,	1		 ; esc
 
-	pop es	
+	pop es
+	sti
 	jnz	@@1
 ;
 	mov	di,	4*vector
@@ -164,6 +172,19 @@ to_buffer:
 	stc
 	ret
 
+newline:
+	mov cx, screen_width * 10
+	mov ax, 0
+	mov di, ax
+	mov ax, screen_width
+	mov si, ax
+	
+
+loop_new_line:
+	movsw ; ds:si -> es:di
+
+	loop loop_new_line
+	
 
 ;--------------------------------------------------------
 to_hex:
