@@ -303,7 +303,8 @@ print_char:
     jmp string_loop ; go back to the beginning of our loop
 
 draw_char:
-	mov	ah,	070h ; color
+	; xor ah, ah
+	mov	ah,	0fh ; color
 	stosw ; ax -> es:di
 	ret
 ;--------------------------------------------------------
