@@ -49,7 +49,7 @@ old_di dw 0
 line_str db '    <', 0
 
 screen_width equ 160
-base_line equ 10
+base_line equ 24
 
 screen_height equ 24
 
