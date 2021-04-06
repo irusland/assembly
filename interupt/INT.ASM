@@ -51,16 +51,22 @@ base_line equ 10
 
 screen_height equ 32
 
+got_new	db	0
 
 my_int proc near
 
 	push ax
 	push di
 	push es
-	mov di, offset buffer ; addr of buffer
+
 	mov cx, ds
 	mov es, cx ; ВОТ В ЧЕМ БЫЛА ПРОБЛЕМА es 0000 а ds 6028
-	
+
+	mov di, offset got_new
+	mov al, 1
+	stosb ; al -> es:di
+
+	mov di, offset buffer ; addr of buffer
 	
 	; in al, 64h ; al <- port   ввод порта PB
 	; stosb ; al -> es:di
@@ -112,7 +118,16 @@ begin proc near
 @@1:
 	hlt ; TODO HALT FOR SLEEP
 	; int 9h
-	cli
+
+	mov si, offset got_new
+	lodsb ; al <- DS:SI
+	cmp al, 1 ; has new data
+	jne @@1 
+	
+	mov di, offset got_new
+	mov al, 0
+	stosb ; al -> es:di
+	
 	push es
 	mov	bx, 0b800h
 	mov	es, bx
@@ -131,16 +146,15 @@ begin proc near
 	mov al, bl
 	stosw ; ax -> es:di	
 
+	pop es
 	mov di, screen_width * (base_line + 1)
-	cmp	al,	20		 ; -------------
-	ccall line
+	cmp	al,	39h		 ; -------------
+	je prt_line
 
-	ccall newline
+	; ccall newline
 
 	cmp	al,	1		 ; esc
 
-	pop es
-	sti
 	jnz	@@1
 ;
 	mov	di,	4*vector
@@ -151,6 +165,10 @@ begin proc near
 	sti
 	pop	es
 	ret
+
+prt_line:
+	ccall line
+	jmp @@1
 begin endp
 
 ; todo buffer
