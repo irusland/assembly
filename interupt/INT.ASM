@@ -49,7 +49,7 @@ line_str db '--------', 0
 screen_width equ 160
 base_line equ 10
 
-screen_height equ 32
+screen_height equ 24
 
 got_new	db	0
 
@@ -119,20 +119,25 @@ begin proc near
 	hlt ; TODO HALT FOR SLEEP
 	; int 9h
 
+	push es
+
 	mov si, offset got_new
 	lodsb ; al <- DS:SI
-	cmp al, 1 ; has new data
-	jne @@1 
+	cmp al, 0 ; no new data
+	je @@1 
 	
 	mov di, offset got_new
 	mov al, 0
+	mov bx, ds
+	mov es, bx
 	stosb ; al -> es:di
 	
-	push es
 	mov	bx, 0b800h
 	mov	es, bx
 	mov	di, screen_width * base_line ; screen char position
 
+
+	ccall newline
 	
 	mov si, offset buffer
 	lodsw ; AX <- DS:SI
@@ -149,12 +154,9 @@ begin proc near
 	pop es
 	mov di, screen_width * (base_line + 1)
 	cmp	al,	39h		 ; -------------
-	je prt_line
-
-	; ccall newline
+	; je prt_line
 
 	cmp	al,	1		 ; esc
-
 	jnz	@@1
 ;
 	mov	di,	4*vector
@@ -191,18 +193,35 @@ to_buffer:
 	ret
 
 newline:
+	push ds
+	push si
+	mov bx, 0b800h
+	mov ds, bx
+	mov es, bx
+	mov si, 80
+	mov di, 0
 	mov cx, screen_width * 10
-	mov ax, 0
-	mov di, ax
-	mov ax, screen_width
-	mov si, ax
+scroll:
+	xor ax, ax
+	lodsw ; ds:si
+	stosw ; es:di
+	loop scroll
+	pop si
+	pop ds
+
+; 	mov cx, screen_width * 2
+
+; 	mov ax, screen_width
+; 	mov di, ax
+; 	mov ax, screen_width * 2
+; 	mov si, ax
 	
 
-loop_new_line:
-	movsw ; ds:si -> es:di
+; loop_new_line:
+; 	movsw ; ds:si -> es:di
 
-	loop loop_new_line
-	
+; 	loop loop_new_line
+	ret
 
 ;--------------------------------------------------------
 to_hex:
