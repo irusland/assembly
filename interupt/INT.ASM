@@ -54,7 +54,7 @@ screen_height equ 24
 got_new	db	0
 
 my_int proc near
-
+	cli
 	push ax
 	push di
 	push es
@@ -70,11 +70,11 @@ my_int proc near
 	
 	; in al, 64h ; al <- port   ввод порта PB
 	; stosb ; al -> es:di
-	in ax, 60h ; scan from Key board
-	xchg al, ah
+	in al, 60h ; scan from Key board
+	; xchg al, ah
 	stosb ; al -> es:di
-	xchg al, ah
-	stosb ; al -> es:di
+	; xchg al, ah
+	; stosb ; al -> es:di
 
 	pop	es
 	pop di
@@ -88,6 +88,7 @@ my_int proc near
 	out 20h, al
 	pop ax
 
+	sti
 	iret
 	
 	; db	0eah
@@ -137,10 +138,13 @@ begin proc near
 	mov	di, screen_width * base_line ; screen char position
 
 
+	cli
 	ccall newline
-	
+	sti
+
 	mov si, offset buffer
-	lodsw ; AX <- DS:SI
+	lodsb ; AX <- DS:SI
+	xchg al, ah
 	mov dx, ax
 	ccall to_hex
 	ccall print_hex
@@ -198,9 +202,9 @@ newline:
 	mov bx, 0b800h
 	mov ds, bx
 	mov es, bx
-	mov si, 80
+	mov si, screen_width
 	mov di, 0
-	mov cx, screen_width * 10
+	mov cx, screen_width * screen_height
 scroll:
 	xor ax, ax
 	lodsw ; ds:si
