@@ -13,9 +13,11 @@ pushr macro
     push BP
     push SI
     push DI
+	push es
 endm
 
 popr macro
+	pop es
     pop DI
     pop SI
     pop BP
@@ -44,7 +46,7 @@ tail	dw	offset buffer
 old_di dw 0
 
 
-line_str db '-------------------', 0
+line_str db '    <', 0
 
 screen_width equ 160
 base_line equ 10
@@ -166,11 +168,12 @@ begin proc near
 	sti
 
 	pop es
-	; mov di, screen_width * (base_line + 1)
+
+	mov di, screen_width * (base_line)
 	cmp	al,	0b9h		 ; -------------
 	je prt_line
-	cmp	al,	039h		 ; -------------
-	je prt_line
+	; cmp	al,	039h		 ; -------------
+	; je prt_line
 
 	cmp	al,	1		 ; esc
 	jnz	@@1
@@ -307,8 +310,11 @@ draw_char:
 
 
 line:
+	mov	bx, 0b800h
+	mov	es, bx
     mov bx, offset line_str   ; print the string pointed to by bx
 	jmp string_loop
+	ret
 
 .data
 ; global variables
