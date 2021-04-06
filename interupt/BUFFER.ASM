@@ -11,8 +11,8 @@ tail	dw	offset buffer
 
 begin:
 	xor	ax,	ax
-	int	16h
-	call	to_buffer
+	int	16h ; scan -> ah, ascii -> al
+	call to_buffer
 	jnc	begin
 	ret
 
@@ -26,7 +26,7 @@ to_buffer:
 	cmp	bx,	head
 	jz	@@2
 	mov	di,	tail
-	stosb
+	stosb ; es:di <- al
 	mov	tail,	bx
 	clc
 	ret
