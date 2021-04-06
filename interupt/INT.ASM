@@ -27,9 +27,9 @@ popr macro
 endm
 
 ccall macro func
-	pusha
+	pushr
 	call func
-	popa
+	popr
 endm
 
 
@@ -48,21 +48,10 @@ my_int proc near
 	push di
 	push es
 	in al, 60h ; scan from Key board
-	; xor bx, bx
 	mov di, offset buffer ; addr of buffer
-	; mov di, bx
 	mov cx, ds
-	mov es, cx
+	mov es, cx ; ВОТ В ЧЕМ БЫЛА ПРОБЛЕМА es 0000 а ds 6028
 	stosb ; -> es:di
-
-	; mov	bx, 0b800h
-	; mov	es, bx
-	; mov	di, cs:old_di ; screen char position
-	; inc di
-	; mov ax, ds
-    ; mov	ah,	060h
-	; stosb ; ax -> es:di	
-	; mov cs:old_di, di
 
 	pop	es
 	pop di
@@ -76,7 +65,6 @@ my_int proc near
 	out 20h, al
 	pop ax
 
-	; popr
 	iret
 	
 	; db	0eah
@@ -105,27 +93,25 @@ begin proc near
 	stosw	; 0000:0026	<- 6028
 	sti
 @@1:
-;	hlt ; TODO HALT FOR SLEEP
-	int 9h
+	hlt ; TODO HALT FOR SLEEP
+	; int 9h
 	
-	; xor bx, bx
-	; mov bl, cs:buffer
-	; mov si, bx
+	
 	mov si, offset buffer
 	lodsb ; al <- DS:SI
 
-	; push ax
 	push es
-	; push di
 	mov	bx, 0b800h
 	mov	es, bx
-	mov	di, 360 ; screen char position
+	mov	di, 720 ; screen char position
     mov	ah,	060h
     ; mov al, 39h
-	stosb ; ax -> es:di	
-	; pop di
+	stosw ; ax -> es:di	
+	mov dx, ax
+	ccall to_hex
+	ccall print_hex
+
 	pop es
-	; pop ax
 	
 	cmp	al,	1		 ; esc
 	
@@ -141,6 +127,7 @@ begin proc near
 	ret
 begin endp
 
+; todo buffer
 to_buffer:
 	mov	bx,	tail
 	inc	bx
@@ -158,5 +145,75 @@ to_buffer:
 @@2:
 	stc
 	ret
+
+
+;--------------------------------------------------------
+to_hex:
+;    pushr             ; save the register values to the stack for later
+
+    mov cx,4          ; Start the counter: we want to print 4 characters
+                    ; 4 bits per char, so we're printing a total of 16 bits
+
+char_loop:
+    dec cx            ; Decrement the counter
+    mov ax,dx         ; copy bx into ax so we can mask it for the last chars
+    shr dx,4          ; shift bx 4 bits to the right
+    and ax,0fh        ; mask ah to get the last 4 bits
+
+    mov bx, offset HEX_OUT   ; set bx to the memory address of our string
+    
+    add bx, 1         ; skip the '> '
+    cmp cx, 2
+    jae skip
+continue:
+
+    add bx, cx        ; add the current counter to the address
+
+    cmp ax, 0ah        ; Check to see if it's a letter or number
+    jl set_letter     ; If it's a number, go straight to setting the value
+    add al, 27h
+    jmp set_letter
+
+skip:
+    add bx, 1
+    jmp continue
+
+
+set_letter:
+    add al, 030h      ; For and ASCII number, add 0x30
+    mov byte [bx], al  ;  the value of the byte to the char at bx
+
+    cmp cx, 0          ; check the counter, compare with 0
+    je print_hex_done ; if the counter is 0, finish
+    jmp char_loop     ; otherwise, loop again
+
+print_hex_done:
+    ret               ; return the function
+
+;--------------------------------------------------------
+print_hex:     ; Push registers onto the stack
+    mov bx, offset HEX_OUT   ; print the string pointed to by bx
+
+string_loop:
+    mov al, [bx]    ; Set al to the value at bx
+    cmp al, 0       ; Compare the value in al to 0 (check for null terminator)
+    jne print_char  ; If it's not null, print the character at al
+                  ; Otherwise the string is done, and the function is ending
+    ;popr            ; Pop all the registers back onto the stack
+    ret             ; return execution to where we were
+
+print_char:
+    call draw_char        ; Print character
+    add bx, 1       ; Shift bx to the next character
+    jmp string_loop ; go back to the beginning of our loop
+
+draw_char:
+	mov	ah,	070h ; color
+	stosw ; ax -> es:di
+	ret
+;--------------------------------------------------------
+.data
+; global variables
+HEX_OUT: db '> __ __ =',0
 
 end _start
