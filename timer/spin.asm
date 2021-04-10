@@ -62,20 +62,14 @@ key_int proc near
 	mov cx, ds
 	mov es, cx ; ВОТ В ЧЕМ БЫЛА ПРОБЛЕМА es 0000 а ds 6028
 
-	; mov si, offset got_new
-	; lodsb ; al <- DS:SI
-	; mov di, offset got_new
-	; inc ax
-	; stosb ; al -> es:di
-
 	mov di, offset buffer; addr of buffer
 
 	in al, 60h ; scan from Key board
-	; cmp al, 27
-	; jne skip
+	cmp al, 1
+	jne skip
 	mov al, 2 ; 2nd command
 	call to_buffer
-; skip:
+skip:
 	pop	es
 	pop di
 	in	al, 61h ; al <- port   ввод порта PB
@@ -102,8 +96,14 @@ timer_int proc near
 	mov cx, ds
 	mov es, cx ; ВОТ В ЧЕМ БЫЛА ПРОБЛЕМА es 0000 а ds 6028
 
+	; mov si, offset got_new
+	; lodsb ; al <- DS:SI
+	; mov di, offset got_new
+	; inc ax
+	; stosb ; al -> es:di
+
 	mov ax, 1
-    ; call to_buffer ; al -> 
+    call to_buffer ; al -> 
 
 ; interupt accept!!!
 	mov al, 20h
