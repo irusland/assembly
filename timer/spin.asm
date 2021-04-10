@@ -211,8 +211,7 @@ push es
 @@f:
 	mov frame_current, bx
 	
-	mov ax, bx
-	add ax, 30h
+	mov al, frames[bx]
 	
 	mov	bx, 0b800h
 	mov	es, bx
