@@ -44,14 +44,13 @@ buflen equ 6
 head	dw	offset buffer
 tail	dw	offset buffer
 
-old_di dw 0
 
-
-line_str db '    <', 0
 screen_width equ 160
 base_line equ 24
 screen_height equ 24
-got_new	db	0
+
+ticks	dw	0
+max_ticks dw 10
 ; --------------------------------
 
 key_int proc near
@@ -96,14 +95,16 @@ timer_int proc near
 	mov cx, ds
 	mov es, cx ; ВОТ В ЧЕМ БЫЛА ПРОБЛЕМА es 0000 а ds 6028
 
-	; mov si, offset got_new
-	; lodsb ; al <- DS:SI
-	; mov di, offset got_new
-	; inc ax
-	; stosb ; al -> es:di
-
+	mov bx, ticks
+	inc bx
+	cmp bx, max_ticks
+	jnz @@1
+	mov bx, 0
 	mov ax, 1
     call to_buffer ; al -> 
+
+@@1:
+	mov ticks, bx
 
 ; interupt accept!!!
 	mov al, 20h
