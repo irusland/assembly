@@ -51,10 +51,17 @@ screen_horizontal_mid equ screen_width / 2
 screen_height equ 24
 
 ticks	dw	0
-max_ticks dw 3
+max_ticks dw 1
 
 frame_start label near
-frames db '|/-\'
+; frames db '|/-\'
+; frames db 186, 201, 205, 187
+; frames db '.', 'o', 'O', '@', '*'
+; frames db 'p', 'd', 'b', 'o'
+; frames db '|[/-\]'
+; frames db '|[{(COo.oOD)}]'
+frames db '|[{(|)}]'
+
 frame_end label	near            ;метка конца кода
 frame_count  equ     offset frame_end - offset frame_start
 frame_current dw 0
