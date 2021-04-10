@@ -117,10 +117,11 @@ timer_int endp
 begin proc near
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     ; intercept      ; INTERCEPT VECTOR
-	
+	; INT TIMER
+	push	ds		; 6028
+
 	mov	si,	4*timer_vector ; vector addr 4 byte si point to 9th vector
 	mov	di,	offset timer_int_old_addr ; 0104
-	push	ds		; 6028
 	xor	ax,	ax
 	mov	ds,	ax		; int table 0000
 
@@ -139,12 +140,36 @@ begin proc near
 	mov	ax,	cs	; 6028
 	stosw	; 0000:0026	<- 6028
 	sti
+
+	pop es
+	push	ds		; 6028
+;	INT KEY
+	mov	si,	4*key_vector ; vector addr 4 byte si point to 9th vector
+	mov	di,	offset key_int_old_addr ; 0104
+	xor	ax,	ax
+	mov	ds,	ax		; int table 0000
+
+					; old_addr	<- addr int 9
+	movsw			; 6028:0104 <- 0000:0024	; 	ES:DI   <- 	 DS:SI
+	movsw			; 6028:0106 <- 0000:0026  
+	push	ds
+	push	es
+	pop	ds	; 6028
+	pop	es	; 0000
+	mov	di,	4*key_vector
+	mov	ax,	offset key_int ; 0103
+	cli
+			; int 9 	<- my_int
+	stosw 	; 0000:0024	<- 0103	 ES:DI <- AX
+	mov	ax,	cs	; 6028
+	stosw	; 0000:0026	<- 6028
+	sti
+
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 push es
 @@1:
 	hlt ; TODO HALT FOR SLEEP
     ; exits if interrupt occurs
-	; int 08h
 
     call from_buffer ; al <- if carry
     jnc @@1   ; jump carry flag CF == 0
@@ -163,12 +188,21 @@ push es
 	pop es
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     ; revert     ; REVER INTERCEPT VECTOR
+	; INT TIMER
 	mov	di,	4*timer_vector
 	mov	si,	offset timer_int_old_addr
 	cli
 	movsw ; 	ES:DI   <- 	 DS:SI
 	movsw
 	sti
+	; INT KEYBOARD
+	mov	di,	4*key_vector
+	mov	si,	offset key_int_old_addr
+	cli
+	movsw ; 	ES:DI   <- 	 DS:SI
+	movsw
+	sti
+
 	pop	es
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     ret
@@ -205,7 +239,7 @@ revert macro
 	mov	di,	4*timer_vector
 	mov	si,	offset timer_int_old_addr
 	cli
-	movsw
+	movsw ; 	ES:DI   <- 	 DS:SI
 	movsw
 	sti
 	pop	es
