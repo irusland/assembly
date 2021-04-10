@@ -46,7 +46,8 @@ tail	dw	offset buffer
 
 
 screen_width equ 160
-base_line equ 24
+screen_vertical_mid equ 12
+screen_horizontal_mid equ screen_width / 2
 screen_height equ 24
 
 ticks	dw	0
@@ -190,7 +191,7 @@ push es
 @@1:
 	hlt ; TODO HALT FOR SLEEP
     ; exits if interrupt occurs
-	int 08h
+	; int 08h
 
     call from_buffer ; al <- if carry
     jnc @@1   ; jump carry flag CF == 0
@@ -215,7 +216,7 @@ push es
 	
 	mov	bx, 0b800h
 	mov	es, bx
-	mov	di, screen_width * base_line ; screen char position
+	mov	di, screen_width * screen_vertical_mid + screen_horizontal_mid ; screen char position
 	mov ah, 070h
 	stosw ; ax -> es:di	
 	jmp @@1
