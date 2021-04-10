@@ -50,7 +50,13 @@ base_line equ 24
 screen_height equ 24
 
 ticks	dw	0
-max_ticks dw 10
+max_ticks dw 3
+
+frame_start label near
+frames db '|/-\'
+frame_end label	near            ;метка конца кода
+frame_count  equ     offset frame_end - offset frame_start
+frame_current dw 0
 ; --------------------------------
 
 key_int proc near
@@ -99,10 +105,9 @@ timer_int proc near
 	inc bx
 	cmp bx, max_ticks
 	jnz @@1
-	mov bx, 0
 	mov ax, 1
     call to_buffer ; al -> 
-
+	mov bx, 0
 @@1:
 	mov ticks, bx
 
@@ -185,7 +190,7 @@ push es
 @@1:
 	hlt ; TODO HALT FOR SLEEP
     ; exits if interrupt occurs
-	; int 09h
+	int 08h
 
     call from_buffer ; al <- if carry
     jnc @@1   ; jump carry flag CF == 0
@@ -197,11 +202,21 @@ push es
 	jz @@c2
 	jmp @@1
 @@c1:
+	mov bx, frame_current
+	inc bx
+	cmp bx, frame_count
+	jnz @@f
+	mov bx, 0
+@@f:
+	mov frame_current, bx
+	
+	mov ax, bx
+	add ax, 30h
+	
 	mov	bx, 0b800h
 	mov	es, bx
 	mov	di, screen_width * base_line ; screen char position
 	mov ah, 070h
-	add al, 30h
 	stosw ; ax -> es:di	
 	jmp @@1
 
