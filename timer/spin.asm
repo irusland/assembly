@@ -71,6 +71,7 @@ key_int proc near
 	mov di, offset buffer; addr of buffer
 
 	in al, 60h ; scan from Key board
+	mov al, 2 ; 2nd command
 	call to_buffer
 
 	pop	es
@@ -142,7 +143,7 @@ begin proc near
 	sti
 
 	pop es
-	push	ds		; 6028
+	push	es		; 6028
 ;	INT KEY
 	mov	si,	4*key_vector ; vector addr 4 byte si point to 9th vector
 	mov	di,	offset key_int_old_addr ; 0104
@@ -173,17 +174,24 @@ push es
 
     call from_buffer ; al <- if carry
     jnc @@1   ; jump carry flag CF == 0
+	clc
 
 	cmp	al,	1		 ; command 1
-
+	jz @@c1
+	cmp	al,	2		 ; command 1
+	jz @@c2
+	jmp @@1
+@@c1:
 	mov	bx, 0b800h
 	mov	es, bx
 	mov	di, screen_width * base_line ; screen char position
 	mov ah, 070h
 	add al, 30h
 	stosw ; ax -> es:di	
+	jmp @@1
 
-	; jnz	@@1
+@@c2:
+	
 
 	pop es
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
