@@ -71,9 +71,11 @@ key_int proc near
 	mov di, offset buffer; addr of buffer
 
 	in al, 60h ; scan from Key board
+	; cmp al, 27
+	; jne skip
 	mov al, 2 ; 2nd command
 	call to_buffer
-
+; skip:
 	pop	es
 	pop di
 	in	al, 61h ; al <- port   ввод порта PB
@@ -101,7 +103,7 @@ timer_int proc near
 	mov es, cx ; ВОТ В ЧЕМ БЫЛА ПРОБЛЕМА es 0000 а ds 6028
 
 	mov ax, 1
-    call to_buffer ; al -> 
+    ; call to_buffer ; al -> 
 
 ; interupt accept!!!
 	mov al, 20h
@@ -167,10 +169,22 @@ begin proc near
 	sti
 
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+; перевести видеоподсистему в режим №1
+; mov ah, 00h
+; mov al, 1
+; int 10h
+; ; убрать курсор
+; mov ah, 01h
+; mov ch, 06h
+; mov cl, 07h
+; int 10h
+;
+
 push es
 @@1:
 	hlt ; TODO HALT FOR SLEEP
     ; exits if interrupt occurs
+	; int 09h
 
     call from_buffer ; al <- if carry
     jnc @@1   ; jump carry flag CF == 0
@@ -213,6 +227,11 @@ push es
 
 	pop	es
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+; cls
+	; mov ah, 00h
+	; mov al, 3
+	; int 10h
+
     ret
 begin endp
 ; --------------------------------
@@ -282,10 +301,14 @@ from_buffer proc near ; buffer[head] -> al
     cmp bx, dx
     jz @@empty 
 
+	inc bx
+	cmp	bx,	offset buffer + buflen
+	jnz	@@has_new
+	mov	bx,	offset buffer
+
 @@has_new:
 	mov	si,	head
     lodsb       ; al <- ds:si
-	inc bx
 	mov	head,	bx  ; tail += 1 mod buflen
     stc
     ret
