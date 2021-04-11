@@ -184,14 +184,14 @@ begin proc near
 
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 ; перевести видеоподсистему в режим №1
-; mov ah, 00h
-; mov al, 1
-; int 10h
+mov ah, 00h
+mov al, 1
+int 10h
 ; ; убрать курсор
-; mov ah, 01h
-; mov ch, 06h
-; mov cl, 07h
-; int 10h
+mov ah, 01h
+mov ch, 01h
+mov cl, 00h
+int 10h
 ;
 
 push es
@@ -222,7 +222,9 @@ push es
 	
 	mov	bx, 0b800h
 	mov	es, bx
-	mov	di, screen_width * screen_vertical_mid + screen_horizontal_mid ; screen char position
+	; mov	di, screen_width * screen_vertical_mid + screen_horizontal_mid ; screen char position
+	mov	di, 0
+
 	mov ah, 070h
 	stosw ; ax -> es:di	
 	jmp @@1
@@ -251,9 +253,9 @@ push es
 	pop	es
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 ; cls
-	; mov ah, 00h
-	; mov al, 3
-	; int 10h
+	mov ah, 00h
+	mov al, 3
+	int 10h
 
     ret
 begin endp
