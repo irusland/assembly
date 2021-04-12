@@ -45,13 +45,13 @@ head	dw	offset buffer
 tail	dw	offset buffer
 
 
-screen_width equ 160
-screen_vertical_mid equ 12
+screen_width equ 40 * 2
 screen_horizontal_mid equ screen_width / 2
-screen_height equ 24
+screen_height equ 25 
+screen_vertical_mid equ screen_height / 2
 
 ticks	dw	0
-max_ticks dw 1
+max_ticks dw 3
 
 frame_start label near
 ; frames db '|/-\'
@@ -222,8 +222,7 @@ push es
 	
 	mov	bx, 0b800h
 	mov	es, bx
-	; mov	di, screen_width * screen_vertical_mid + screen_horizontal_mid ; screen char position
-	mov	di, 0
+	mov	di, screen_width * screen_vertical_mid + screen_horizontal_mid - 2 ; screen char position
 
 	mov ah, 070h
 	stosw ; ax -> es:di	
