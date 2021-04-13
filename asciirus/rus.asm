@@ -6,7 +6,34 @@ jmp begin
 translation equ 2 * 21
 color equ 070h
 
+
+
+
+
+
+setup proc near
+    mov ah, 00h
+    mov al, 03h
+    int 10h
+    ret
+setup endp
+
+
+
+teardown proc near
+    mov ah, 00h
+    mov al, 03h
+    int 10h
+    ret
+teardown endp
+
+
+
+
+
 begin proc near
+    call setup
+
 	cld
 	mov	ax, 0b800h
 	mov	es, ax
@@ -146,6 +173,7 @@ call names
 	je	@return
 
 @return:
+    call teardown
 	ret
 
 names: ; cx: shift  |  si: skip
