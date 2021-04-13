@@ -1,0 +1,29 @@
+понять почему русские не русскими 
+int 10 функц 11 ген символов
+
+al subservice service
+шрифт     
+8х14  1
+8х8   2
+
+font block 0
+
+не рисовать русские найти в инете
+
+cx4 dx25  25 26 27 28 из es:bp
+
+
+ax 11 00
+es:bp bytes of pictures
+
+bl 0
+
+
+int 10 перехват 
+switch mode 
+    load table
+
+
+
+
+custom loader es = cs
