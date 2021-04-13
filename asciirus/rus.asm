@@ -2,6 +2,11 @@
 .code
 org 100h
 _start:
+jmp begin
+translation equ 2 * 21
+color equ 070h
+
+begin proc near
 	cld
 	mov	ax, 0b800h
 	mov	es, ax
@@ -23,7 +28,7 @@ xor cx, cx
 l: 
     mov ax, 160   ;  00a0h
     MUL cl  ; Теперь АХ = AL * BL
-    mov si, 4*2 + 160*3
+    mov si, 4*2 + 160*3 + translation
     add si, ax
 
     mov ax, 16
@@ -39,10 +44,10 @@ l:
 
 
 ; void filler --------------------
-    mov si, 3*2
+    mov si, 3*2 + translation
     mov cl, 0h
     call vline
-    mov si, 1*2
+    mov si, 1*2 + translation
     call vline
 ; void filler --------------------
 
@@ -51,86 +56,86 @@ l:
 mov switch_symbol, 1
 ; row
 mov cx, 2 * 2 ; shift
-mov si, 4*2 + 160 ; skip
+mov si, 4*2 + 160 + translation ; skip
 call names
 ; col
 mov cx, 160
-mov si, 1*2 + 160 * 3 
+mov si, 1*2 + 160 * 3  + translation
 call names
 ; DIGITS --------------------
 
 
 
 ; horizontal lines _________
-    xor si, si
+    mov si, translation
     mov cl, 0cdh ; =
     call hline
-    mov si, 34
+    mov si, 34 + translation
     call hline
 
-    mov si, 160 * 2 ; 
+    mov si, 160 * 2 + translation; 
     mov cl, 0c4h ; -
     call hline
-    mov si, 160 * 2 + 34
+    mov si, 160 * 2 + 34 + translation
     call hline
 
-    mov si, 160 * 19 ; 
+    mov si, 160 * 19 + translation; 
     mov cl, 0cdh ; =
     call hline
-    mov si, 160 * 19 + 34
+    mov si, 160 * 19 + 34 + translation
     call hline
 
 ; vertical lines _________
-    xor si, si
+    mov si, translation
     mov cl, 0bah ; =
     call vline
 
-    mov si, 2 * 2 ; 
+    mov si, 2 * 2 + translation; 
     mov cl, 0b3h ; -
     call vline
 
-    mov si, 19 * 2 + 34; 
+    mov si, 19 * 2 + 34 + translation; 
     mov cl, 0bah ; =
     call vline
 
 ; corners _________
     mov al, 0c9h ; left upper
-    mov di, 0
+    mov di, translation
     call draw_char
     
     mov al, 0c7h ; left middle
-    mov di, 160 * 2
+    mov di, 160 * 2 + translation
     call draw_char
 
     mov al, 0c8h ; left bottom
-    mov di, 160 * 19
+    mov di, 160 * 19 + translation
     call draw_char
 
 
     ; right
     mov al, 0bbh ; upper
-    mov di, 19 * 2 + 34
+    mov di, 19 * 2 + 34 + translation
     call draw_char
     
     mov al, 0b6h ; middle
-    mov di, 160 * 2 + 19 * 2 + 34
+    mov di, 160 * 2 + 19 * 2 + 34 + translation
     call draw_char
 
     mov al, 0bch ; bottom
-    mov di, 160 * 19 + 19 * 2 + 34
+    mov di, 160 * 19 + 19 * 2 + 34 + translation
     call draw_char
 
     ; mid
     mov al, 0d1h ; upper
-    mov di, 2 * 2
+    mov di, 2 * 2 + translation
     call draw_char
     
     mov al, 0c5h ; middle
-    mov di, 160 * 2 + 2 * 2
+    mov di, 160 * 2 + 2 * 2 + translation
     call draw_char
 
     mov al, 0cfh ; bottom
-    mov di, 160 * 19 + 2 * 2
+    mov di, 160 * 19 + 2 * 2 + translation
     call draw_char
 
 ; ESC __________
@@ -218,7 +223,7 @@ draw_dig:
     jl draw_char
     add al, 7
 draw_char:
-	mov	ah,	070h
+	mov	ah,	color
 	stosw ; ax -> es:di
     xor ax, ax
 	ret
@@ -226,5 +231,5 @@ draw_char:
 ; .data
 switch_symbol dw 0
 shift_relative dw 0
-
+begin endp
 end _start
