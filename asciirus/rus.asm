@@ -6,15 +6,30 @@ jmp begin
 translation equ 2 * 21
 color equ 070h
 
+font db 00h, 10h, 10h, 11h, 13h, 05h, 03h, 11h, 0,0,0,0,0,0,0,0,0,0,0,0
 
 
 
 
 
 setup proc near
+    ; cls
     mov ah, 00h
     mov al, 03h
     int 10h
+
+    ; load font
+    mov ah, 11h
+    mov al, 00h ; user font
+    mov bx, ds
+    mov es, bx ; es:bp table
+    mov bp, offset font
+    mov cx, 1 ; char count 
+    mov dx, 0 ; table char (letter) offset
+    mov bl, 0 ; font block (0-3)
+    mov bh, 8 ; bytes per char
+    int 10h
+
     ret
 setup endp
 
