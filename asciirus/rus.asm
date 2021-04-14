@@ -48,6 +48,7 @@ begin proc near
 	je	@@change_font
 	cmp	al,	1bh		; esc
 	je	@@reboot
+    jmp @@b
 
 @@1:
     call setup
@@ -74,18 +75,15 @@ begin proc near
     sub ax, font_size
     cmp ax, 0
     jge good
-    mov ax, fonts_max - font_size
-good:
-    mov font, ax
-	jmp @@1
-
+    mov ax, offset fonts_end - font_size
+    jmp good
 @down:
     mov ax, font
     add ax, font_size
-    cmp ax, fonts_max
-    jb goodd
+    cmp ax, offset fonts_end
+    jb good
     mov ax, offset fonts_start
-goodd:
+good:
     mov font, ax
 	jmp @@1
 
