@@ -73,8 +73,8 @@ begin proc near
 @up:
     mov ax, font
     sub ax, font_size
-    cmp ax, 0
-    jge good
+    cmp ax, offset fonts_start
+    jg good
     mov ax, offset fonts_end - font_size
     jmp good
 @down:
