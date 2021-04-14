@@ -2,7 +2,7 @@
 .code
 org 100h
 _start:
-jmp begin
+jmp @@1
 translation equ 2 * 21
 color equ 070h
 
@@ -17,7 +17,7 @@ setup proc near
     mov al, 00h ; user font
     mov bx, ds
     mov es, bx ; es:bp table
-    mov bp, offset font
+    mov bp, font
     mov cx, 256 ; char count 
     mov dx, 0 ; table char (letter) offset
     mov bl, 0 ; font block (0-3)
@@ -41,13 +41,64 @@ teardown endp
 
 
 begin proc near
+@@b:
+	xor	ah,	ah		; ROM BIOS 00h interrupt
+	int	16h			; read scan -> ah, char -> al
+	cmp al,	0
+	je	@@change_font
+	cmp	al,	1bh		; esc
+	je	@@reboot
+
+@@1:
     call setup
 
 	cld
 	mov	ax, 0b800h
 	mov	es, ax
 	mov	di, 160 ; screen char position
-@@1:
+
+    push ds
+    call draw_table
+    pop ds
+    jmp @@b
+
+@@change_font:
+	cmp ah,	48h
+	je	@up
+	cmp ah,	50h
+	je	@down
+    jmp @@1
+
+@up:
+    mov ax, font
+    sub ax, font_size
+    cmp ax, 0
+    jge good
+    mov ax, fonts_max - font_size
+good:
+    mov font, ax
+	jmp @@1
+
+@down:
+    mov ax, font
+    add ax, font_size
+    cmp ax, fonts_max
+    jl goodd
+    mov ax, offset fonts_start
+goodd:
+    mov font, ax
+	jmp @@1
+
+@@reboot:
+    call teardown
+    ret
+
+
+switch_symbol dw 0
+shift_relative dw 0
+begin endp
+
+draw_table proc near
 
 ; CHARS --------------------
 ; cs shift relative
@@ -173,17 +224,7 @@ call names
     mov al, 0cfh ; bottom
     mov di, 160 * 19 + 2 * 2 + translation
     call draw_char
-
-; ESC __________
-	xor	ah,	ah		; ROM BIOS 00h interrupt
-	int	16h			; read charnum -> ah, char -> al
-
-	cmp	al,	1bh		; esc
-	je	@return
-
-@return:
-    call teardown
-	ret
+    ret
 
 names: ; cx: shift  |  si: skip
     xor dx, dx
@@ -264,13 +305,18 @@ draw_char:
 	stosw ; ax -> es:di
     xor ax, ax
 	ret
+draw_table endp
 
-; .data
-switch_symbol dw 0
-shift_relative dw 0
-begin endp
 
-font:
-include font1.asm
+
+font_size equ 4096
+
+fonts_start label
+include labels.asm
+fonts_end label
+
+fonts_max equ offset fonts_end
+font dw offset fonts_start
+
 
 end _start
