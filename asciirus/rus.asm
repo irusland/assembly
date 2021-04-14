@@ -83,7 +83,7 @@ good:
     mov ax, font
     add ax, font_size
     cmp ax, fonts_max
-    jl goodd
+    jb goodd
     mov ax, offset fonts_start
 goodd:
     mov font, ax
