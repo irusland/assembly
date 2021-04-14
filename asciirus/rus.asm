@@ -6,7 +6,6 @@ jmp begin
 translation equ 2 * 21
 color equ 070h
 
-
 setup proc near
     ; cls
     mov ah, 00h
@@ -271,6 +270,7 @@ switch_symbol dw 0
 shift_relative dw 0
 begin endp
 
-include font.asm
+font:
+include font1.asm
 
 end _start
