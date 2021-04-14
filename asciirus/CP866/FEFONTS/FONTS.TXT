@@ -1,0 +1,156 @@
+лллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл
+мммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммм
+ФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФ
+
+  плллллллл                      плллллллл                     плллллллллллп
+    лл  плл                  м     лл  плл        м       м      пллп пллп
+    лл    п                  л     лл    п        л   л   л       лл   лл
+    лл мл                    лмм   лл мл          л       лмм     лл   лл
+    ллллл   млллм   л мллм   л     ллллл     млллмл   л   л       лл   лл
+    лл пл  лп   пл  ллп  пл  л     лл пл    лп   пл   л   л       лл   лл
+    лл     л     л  л     л  л     лл    м  л     л   л   л       лл   лл
+    лл     лм   мл  л     л  л     лл  млл  лм   мл   л   л      мллм мллм
+  мллллм    плллп   л     л  плм млллллллл   плллпплм плм плм  млллллллллллм
+
+
+			  FontEdit ][ version 1.00
+		      (C) Copyright 1994, SEI Soft'94
+			      by Ivan Llanas
+
+			`The Dual Text Font Editor'
+
+ФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФ
+пппппппппппппппппппппппппппппппппппппппппппппппппппппппппппппппппппппппппппппп
+лллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл
+
+
+     Here they are. 447,774 bytes in fonts. Almost every of them were  given
+  to me by Aitor (thanks, Aitor). I'm sure you'll find a font that will like
+  you; but if not, you can dowload FontEdit ][ and make your own.
+     This packed file should include the next files :
+
+		32       FNT     8192      8x32 font
+		3270     FNT     3584      8x8  font
+		8X10     FNT     2560      8x10 font
+		8X11SNSF FNT     2816      8x11 font
+		8X14     FNT     4096      8x16 font
+		8X6      FNT     1536      8x6  font
+		8X8ITAL  FNT     2048      8x8  font
+		9X16SNSF FNT     4096      8x16 font
+		AMBASSAD FNT     4096      8x16 font
+		ANTIQUE  FNT     4096      8x16 font
+		APLS     FNT     4096      8x16 font
+		APLS10   FNT     4096      8x16 font
+		APLS11   FNT     2816      8x11 font
+		ASCII_HX FNT     4096      8x16 font
+		BACKSLNT FNT     4096      8x16 font
+		BAUHAUS  FNT     4096      8x16 font
+		BINARY   FNT     4096      8x16 font
+		BLOODY   FNT     4096      8x16 font
+		BODONI   FNT     4096      8x16 font
+		BOLD0    FNT     4096      8x16 font
+		BOLD1    FNT     4096      8x16 font
+		BOLD2    FNT     4096      8x16 font
+		BOLD3    FNT     4096      8x16 font
+		BOLD4    FNT     4096      8x16 font
+		BOLD5    FNT     4096      8x16 font
+		BRAILLE  FNT     4096      8x16 font
+		BROADWAY FNT     4096      8x16 font
+		BROADWY1 FNT     4096      8x16 font
+		BROADWY2 FNT     4096      8x16 font
+		BROADWY3 FNT     4096      8x16 font
+		BRUSH    FNT     4096      8x16 font
+		CALCULAT FNT     4096      8x16 font
+		CIRCLE   FNT     4096      8x16 font
+		COMPUTER FNT     4096      8x16 font
+		COMPUTR2 FNT     4096      8x16 font
+		COMPUTR3 FNT     4096      8x16 font
+		COURIER  FNT     4096      8x16 font
+		COURIER1 FNT     4096      8x16 font
+		CYRILLI2 FNT     4096      8x16 font
+		CYRILLI3 FNT     4096      8x16 font
+		CYRILLIC FNT     4096      8x16 font
+		DECO     FNT     4096      8x16 font
+		DEF_8X14 FNT     3584      8x8  font
+		DEF_8X16 FNT     4096      8x16 font
+		DEF_8X8  FNT     2048      8x8  font
+		ELEGANT2 FNT     4096      8x16 font
+		ELEGANTE FNT     4096      8x16 font
+		ELEGITAL FNT     4096      8x16 font
+		ELERGON  FNT     4096      8x16 font
+		F0       FNT     3584      8x8  font
+		FANTASY  FNT     2048      8x8  font
+		FE_8X14  FNT     3584      8x8  font
+		FE_8X16  FNT     4096      8x16 font
+		FE_8X8   FNT     2048      8x8  font
+		FILE_ID  DIZ      721
+		FONTS    TXT     6360      This file! Or not?
+		FRESNO   FNT     4096      8x16 font
+		FUTURA   FNT     4096      8x16 font
+		GAELIC   FNT     4096      8x16 font
+		GOTHIC   FNT     4096      8x16 font
+		GOTHIC2  FNT     4096      8x16 font
+		GOTH_NEW FNT     4096      8x16 font
+		GREEK    FNT     4096      8x16 font
+		HEBREW   FNT     4096      8x16 font
+		HIGHSEAS FNT     3584      8x8  font
+		ITALIC   FNT     3584      8x8  font
+		ITALIC2  FNT     4096      8x16 font
+		ITALIC3  FNT     4096      8x16 font
+		ITALIC4  FNT     3584      8x8  font
+		IVAN     FNT     3584      8x8  font
+		JAP      FNT     3584      8x8  font
+		JULIE    FNT     4096      8x16 font
+		JULIE2   FNT     4096      8x16 font
+		KOOL     FNT     4096      8x16 font
+		LCD      FNT     4096      8x16 font
+		LEGEND   FNT     4096      8x16 font
+		MERP     FNT     4096      8x16 font
+		MERP2    FNT     4096      8x16 font
+		MERP3    FNT     4096      8x16 font
+		MODERN   FNT     4096      8x16 font
+		MODERN1  FNT     4096      8x16 font
+		MODERN2  FNT     4096      8x16 font
+		MORSE    FNT     4096      8x16 font
+		NUTSO    FNT     4096      8x16 font
+		OUTLINE  FNT     2816      8x11 font
+		PARKAVE  FNT     4096      8x16 font
+		PEKIGORD FNT     4096      8x16 font
+		PERCY    FNT     4096      8x16 font
+		ROMAN    FNT     4096      8x16 font
+		ROMAN2   FNT     4096      8x16 font
+		ROMANY   FNT     4096      8x16 font
+		RUNES    FNT     4096      8x16 font
+		SANSERIF FNT     4096      8x16 font
+		SCRAWL   FNT     4096      8x16 font
+		SCRIPT   FNT     4096      8x16 font
+		SCRIPT2  FNT     4096      8x16 font
+		SCRIPT3  FNT     4096      8x16 font
+		SCRIPT4  FNT     4096      8x16 font
+		SERIFBIG FNT     4096      8x16 font
+		SIMPAGAR FNT     4096      8x16 font
+		SIMPLE   FNT     4096      8x16 font
+		SLANT    FNT     3584      8x8  font
+		SMALL    FNT     2560      8x10 font
+		SMEGA    FNT     3584      8x8  font
+		SMEGA88  FNT     2048      8x8  font
+		SMOOTH   FNT     4096      8x16 font
+		SMVGA    FNT     4096      8x16 font
+		SMVGA88  FNT     2048      8x8  font
+		STRETCH  FNT     4096      8x16 font
+		SWISS    FNT     4096      8x16 font
+		TENGWAR  FNT     4096      8x16 font
+		THAI     FNT     4096      8x16 font
+		THIN     FNT     4096      8x16 font
+		THIN8X8  FNT     2048      8x8  font
+		THNSERIF FNT     4096      8x16 font
+		TINYTYPE FNT     2048      8x8  font
+		WACKY    FNT     4096      8x16 font
+		YIDDISH  FNT     4096      8x16 font
+
+
+     Hope you'll enjoy them.
+
+								Ivan Llanas
+
+
