@@ -35,8 +35,8 @@ _start:
 	stosw ; ax -> es:di
 
     mov ah, 02h ; int 13 02h
-    mov al, 18  ; number of sectors to read
-    mov ch, 2   ; cylinder/track number 
+    mov al, 18  ; number of sectors to read   max=9 !!!!!
+    mov ch, 2   ; cylinder/track number       if >9    => ch++
     mov cl, 1   ; starting sector number
     mov dh, 0   ; head number
     mov dl, 0   ; drive number

@@ -7,7 +7,7 @@ msg1 db '1', 0dh, 0ah, 24h
 msg2 db '2', 0dh, 0ah, 24h
 msg3 db '3', 0dh, 0ah, 24h
 
-tab    dw offset m1
+tab dw offset m1
     dw offset m2
     dw offset m3
 begin:
