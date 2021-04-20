@@ -12,6 +12,10 @@ setup proc near
     mov al, 03h
     int 10h
 
+    ; select font
+    ; mov ax, offset fonts_start
+    ; mov font, ax
+
     ; load font
     mov ah, 11h
     mov al, 00h ; user font
