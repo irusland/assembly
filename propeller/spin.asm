@@ -59,12 +59,13 @@ max_ticks dw 3
 
 propeller_frame_start label near
 ; propeller_frames db '|/-\'
+propeller_frames db 179, '/', 196, '\'
 ; propeller_frames db 186, 201, 205, 187
-; propeller_frames db '.', 'o', 'O', '@', '*'
+; propeller_frames db '.oO@*'
 ; propeller_frames db 'p', 'd', 'b', 'o'
 ; propeller_frames db '|[/-\]'
 ; propeller_frames db '|[{(COo.oOD)}]'
-propeller_frames db '|[{(|)}]'
+; propeller_frames db '|[{(|)}]'
 
 propeller_frame_end label	near            ;метка конца кода
 propeller_frame_count  equ     offset propeller_frame_end - offset propeller_frame_start
@@ -85,7 +86,8 @@ cmd_vectors	dw 0h
 
 ; --------------------------------
 direction db 0
-under dw 7731h
+; under dw 7731h
+under dw 0
 change_direction proc
 	sub al, 7
 	mov direction, al
@@ -367,6 +369,10 @@ timer_tick proc near
 	mov di, position
 	stosw
 
+	mov ax, position
+	mov cl, screen_width
+	div cl ; al /     ah %
+
 	mov bx, 0 ; frame 0
 	mov dl, direction
 	cmp dl, 0
@@ -382,9 +388,6 @@ timer_tick proc near
 
 @@left:
 	sub si, 2
-	mov ax, position
-	mov cl, screen_width
-	div cl ; al /     ah %
 	cmp ah, 0   ; |*   |  
 	jnz @@f
 	mov si, position
@@ -392,12 +395,24 @@ timer_tick proc near
 	jmp @@f
 @@right:
 	add si, 2
+	cmp ah, screen_width - 2   ; |   *|  
+	jnz @@f
+	mov si, position
+	sub si, screen_width - 2
 	jmp @@f
 @@up:
 	sub si, screen_width
+	cmp al, 0
+	jnz @@f
+	mov si, position
+	add si, screen_width * (screen_height - 1)
 	jmp @@f
 @@down:
 	add si, screen_width
+	cmp al, screen_height - 1
+	jnz @@f
+	mov si, position
+	sub si, screen_width * (screen_height - 1)
 	jmp @@f
 
 @@f:
