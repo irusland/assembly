@@ -15,9 +15,11 @@ pushr macro
     push SI
     push DI
 	push es
+	push ds
 endm
 
 popr macro
+	pop ds
 	pop es
     pop DI
     pop SI
@@ -50,22 +52,45 @@ screen_horizontal_mid equ screen_width / 2
 screen_height equ 25 
 screen_vertical_mid equ screen_height / 2
 
+position dw screen_width * screen_vertical_mid + screen_horizontal_mid - 2
+
 ticks	dw	0
 max_ticks dw 3
 
-frame_start label near
-; frames db '|/-\'
-; frames db 186, 201, 205, 187
-; frames db '.', 'o', 'O', '@', '*'
-; frames db 'p', 'd', 'b', 'o'
-; frames db '|[/-\]'
-; frames db '|[{(COo.oOD)}]'
-frames db '|[{(|)}]'
+propeller_frame_start label near
+; propeller_frames db '|/-\'
+; propeller_frames db 186, 201, 205, 187
+; propeller_frames db '.', 'o', 'O', '@', '*'
+; propeller_frames db 'p', 'd', 'b', 'o'
+; propeller_frames db '|[/-\]'
+; propeller_frames db '|[{(COo.oOD)}]'
+propeller_frames db '|[{(|)}]'
 
-frame_end label	near            ;метка конца кода
-frame_count  equ     offset frame_end - offset frame_start
-frame_current dw 0
+propeller_frame_end label	near            ;метка конца кода
+propeller_frame_count  equ     offset propeller_frame_end - offset propeller_frame_start
+propeller_frame_current dw 0
+
+cmd_vectors	dw 0h
+			dw offset timer_tick
+			dw 0h
+			dw offset speed
+			dw offset speed
+			dw offset speed
+			dw offset speed
+			dw offset change_direction
+			dw offset change_direction
+			dw offset change_direction
+			dw offset change_direction
+			dw offset change_direction
+
 ; --------------------------------
+direction db 0
+under dw 0
+change_direction proc
+	sub al, 7
+	mov direction, al
+	ret
+change_direction endp
 
 key_int proc near
 	push ax
@@ -80,23 +105,52 @@ key_int proc near
 	in al, 60h ; scan from Key board
 	cmp al, 1
 	je @@esc
+
+	xor cl, cl
 	cmp al, 0bh
 	je @@key0
 	cmp al, 02h
 	je @@key1
+	cmp al, 03h
+	je @@key2
+	cmp al, 04h
+	je @@key3
+	cmp al, 39h
+	je @@key_space
+	cmp al, 4bh
+	je @@key_left
+	cmp al, 4d
+	je @@key_right
+
+	jmp skip
+
+@@key3:
+	inc cl
+@@key2:
+	inc cl
+@@key1:
+	inc cl
+@@key0:
+	add cl, 3 ; base cmd
+	mov al, cl
+	call to_buffer
+	jmp skip
+
+@@key_space:
+	mov al, 7
+	call to_buffer
+	jmp skip
+@@key_left:
+	mov al, 8
+	call to_buffer
+	jmp skip
+@@key_right:
+	mov al, 9
+	call to_buffer
 	jmp skip
 
 @@esc:
-	mov al, 2 ; 2nd command
-	call to_buffer
-	jmp skip
-	
-@@key0:
-	mov al, 3
-	call to_buffer
-	jmp skip
-@@key1:
-	mov al, 4
+	mov al, 0 ; 2nd command
 	call to_buffer
 	jmp skip
 
@@ -221,51 +275,40 @@ push es
 	; int 08h
 
     call from_buffer ; al <- if carry
+	; 0 - exit
 	; 1 - timer
-	; 2 - escape
-	; 3 - 0
+	; 2 - 
+	; 3 - speed 0
 	; 4 - 1
+	; 5 - 2
+	; 6 - 3
+	; 7 - stop
+	; 8 - left
+	; 9 - right
+	; 10 - up
+	; 11 - down
+
 
     jnc @@1   ; jump carry flag CF == 0
 	clc
 
-; todo table
-	cmp	al,	1		 ; command 1
-	jz @@c1
-	cmp	al,	2
+	cmp al, 0
 	jz @@exit
-	cmp	al,	3
-	jz @@speed0
-	cmp	al,	4
-	jz @@speed1
+	
+; cmd table
+	xor bx, bx
+    mov bl, al
+    shl bx, 1 ; *2 dw 
+    ccall cmd_vectors[bx]
 	jmp @@1
-@@c1:
-	mov bx, frame_current
-	inc bx
-	cmp bx, frame_count
-	jnz @@f
-	mov bx, 0
-@@f:
-	mov frame_current, bx
-	
-	mov al, frames[bx]
-	
-	mov	bx, 0b800h
-	mov	es, bx
-	mov	di, screen_width * screen_vertical_mid + screen_horizontal_mid - 2 ; screen char position
 
-	mov ah, 070h
-	stosw ; ax -> es:di	
-	jmp @@1
 ; ------------------------
-@@speed0:
-	xor ax, ax
-	mov max_ticks, ax
-	jmp @@1
-@@speed1:
-	mov ax, 1
-	mov max_ticks, ax
-	jmp @@1
+
+speed:
+	sub	al,	3
+	xor	ah, ah
+	mov max_ticks,	ax
+	ret
 ; ------------------------
 @@exit:
 	pop es
@@ -296,6 +339,74 @@ push es
     ret
 begin endp
 ; --------------------------------
+
+timer_tick proc near
+	; push ds
+
+	mov	bx, 0b800h
+	mov	es, bx
+	; mov ds, bx
+
+	mov bx, propeller_frame_current
+	inc bx
+	cmp bx, propeller_frame_count
+	jnz @@f
+
+	mov bx, 0
+	mov dl, direction
+	cmp dl, 0
+	jz @@f
+	cmp dl, 1
+	jz @@left
+	cmp dl, 2
+	jz @@right
+	cmp dl, 3
+	jz @@up
+	cmp dl, 4
+	jz @@down
+
+@@left:
+	; mov ax, under
+	; mov di, position
+	; stosw
+
+	; mov si, position - 2 ; new position
+	; lodsw
+	; mov under, ax
+
+	; mov position, si
+	jmp @@f
+
+@@right:
+	; mov ax, under
+	; mov di, position
+	; stosw
+
+	; mov si, position + 2 ; new possition
+	; lodsw
+	; mov under, ax
+
+	; mov position, si
+	jmp @@f
+
+@@up:
+	jmp @@f
+
+@@down:
+	jmp @@f
+
+@@f:
+	mov propeller_frame_current, bx
+	mov al, propeller_frames[bx]
+
+	mov	di, position ; screen char position
+
+	mov ah, 070h
+	stosw ; ax -> es:di	
+
+	; pop ds
+	ret
+timer_tick endp
 
 
 intercept macro

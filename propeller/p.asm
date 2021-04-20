@@ -13,11 +13,11 @@ tab dw offset m1
 begin:
     mov al, 1
 
-    mov si, offset tab
+    ; mov si, offset tab
     xor bx, bx
     mov bl, al
-    shl bx, 1
-    add si, bx
+    shl bx, 1  ; *2  dw
+    ; add si, bx
     ; jmp [si]
     call tab[bx]
 m0:
