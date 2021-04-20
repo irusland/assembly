@@ -9,3 +9,4 @@ peda-session*
 *.lst
 *.exe
 .DS_Store
+.vscode
