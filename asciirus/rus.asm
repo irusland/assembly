@@ -134,7 +134,7 @@ l:
 
 ; void filler --------------------
     mov si, 3*2 + translation
-    mov cl, 0h
+    mov cl, 20h
     call vline
     mov si, 1*2 + translation
     call vline
@@ -305,7 +305,8 @@ draw_dig:
 draw_char:
 	mov	ah,	color
 	stosw ; ax -> es:di
-    xor ax, ax
+    ; xor ax, ax
+    mov ax, 20h
 	ret
 draw_table endp
 
