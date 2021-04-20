@@ -85,7 +85,7 @@ cmd_vectors	dw 0h
 
 ; --------------------------------
 direction db 0
-under dw 0
+under dw 7731h
 change_direction proc
 	sub al, 7
 	mov direction, al
@@ -381,15 +381,15 @@ timer_tick proc near
 	jz @@down
 
 @@left:
-	; mov ax, under
-	; mov di, position
-	; stosw
 	sub si, 2
-	; mov position, si
-	; lodsw todo update under
-	; mov under, ax
+	mov ax, position
+	mov cl, screen_width
+	div cl ; al /     ah %
+	cmp ah, 0   ; |*   |  
+	jnz @@f
+	mov si, position
+	add si, screen_width - 2
 	jmp @@f
-
 @@right:
 	add si, 2
 	jmp @@f
