@@ -119,7 +119,7 @@ key_int proc near
 	je @@key_space
 	cmp al, 4bh
 	je @@key_left
-	cmp al, 4d
+	cmp al, 4dh
 	je @@key_right
 
 	jmp skip
@@ -366,30 +366,21 @@ timer_tick proc near
 	mov ax, under
 	mov di, position
 	stosw
-
 	mov si, position ; new position
 	sub si, 2
-	; push ds
-	; mov	bx, 0b800h
-	; mov ds, bx
-	; lodsw
-	; pop ds
-	; mov under, ax
-
 	mov position, si
+	mov under, ax
 	jmp @@f
 
 @@right:
 	mov ax, under
 	mov di, position
 	stosw
-
 	mov si, position ; new possition
-	add di, 2
-	lodsw
-	mov under, ax
-
+	add si, 2
 	mov position, si
+	; lodsw todo update under
+	mov under, ax
 	jmp @@f
 
 @@up:
