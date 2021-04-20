@@ -341,11 +341,8 @@ begin endp
 ; --------------------------------
 
 timer_tick proc near
-	; push ds
-
 	mov	bx, 0b800h
 	mov	es, bx
-	; mov ds, bx
 
 	mov bx, propeller_frame_current
 	inc bx
@@ -366,27 +363,33 @@ timer_tick proc near
 	jz @@down
 
 @@left:
-	; mov ax, under
-	; mov di, position
-	; stosw
+	mov ax, under
+	mov di, position
+	stosw
 
-	; mov si, position - 2 ; new position
+	mov si, position ; new position
+	sub si, 2
+	; push ds
+	; mov	bx, 0b800h
+	; mov ds, bx
 	; lodsw
+	; pop ds
 	; mov under, ax
 
-	; mov position, si
+	mov position, si
 	jmp @@f
 
 @@right:
-	; mov ax, under
-	; mov di, position
-	; stosw
+	mov ax, under
+	mov di, position
+	stosw
 
-	; mov si, position + 2 ; new possition
-	; lodsw
-	; mov under, ax
+	mov si, position ; new possition
+	add di, 2
+	lodsw
+	mov under, ax
 
-	; mov position, si
+	mov position, si
 	jmp @@f
 
 @@up:
@@ -404,7 +407,6 @@ timer_tick proc near
 	mov ah, 070h
 	stosw ; ax -> es:di	
 
-	; pop ds
 	ret
 timer_tick endp
 
