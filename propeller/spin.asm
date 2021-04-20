@@ -79,9 +79,27 @@ key_int proc near
 
 	in al, 60h ; scan from Key board
 	cmp al, 1
-	jne skip
+	je @@esc
+	cmp al, 0bh
+	je @@key0
+	cmp al, 02h
+	je @@key1
+	jmp skip
+
+@@esc:
 	mov al, 2 ; 2nd command
 	call to_buffer
+	jmp skip
+	
+@@key0:
+	mov al, 3
+	call to_buffer
+	jmp skip
+@@key1:
+	mov al, 4
+	call to_buffer
+	jmp skip
+
 skip:
 	pop	es
 	pop di
@@ -112,9 +130,11 @@ timer_int proc near
 	mov bx, ticks
 	inc bx
 	cmp bx, max_ticks
-	jnz @@1
+	jb @@1
+	ja @@reset
 	mov ax, 1
     call to_buffer ; al -> 
+@@reset:
 	mov bx, 0
 @@1:
 	mov ticks, bx
@@ -201,13 +221,23 @@ push es
 	; int 08h
 
     call from_buffer ; al <- if carry
+	; 1 - timer
+	; 2 - escape
+	; 3 - 0
+	; 4 - 1
+
     jnc @@1   ; jump carry flag CF == 0
 	clc
 
+; todo table
 	cmp	al,	1		 ; command 1
 	jz @@c1
-	cmp	al,	2		 ; command 1
-	jz @@c2
+	cmp	al,	2
+	jz @@exit
+	cmp	al,	3
+	jz @@speed0
+	cmp	al,	4
+	jz @@speed1
 	jmp @@1
 @@c1:
 	mov bx, frame_current
@@ -227,10 +257,17 @@ push es
 	mov ah, 070h
 	stosw ; ax -> es:di	
 	jmp @@1
-
-@@c2:
-	
-
+; ------------------------
+@@speed0:
+	xor ax, ax
+	mov max_ticks, ax
+	jmp @@1
+@@speed1:
+	mov ax, 1
+	mov max_ticks, ax
+	jmp @@1
+; ------------------------
+@@exit:
 	pop es
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     ; revert     ; REVER INTERCEPT VECTOR
