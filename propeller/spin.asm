@@ -117,10 +117,14 @@ key_int proc near
 	je @@key3
 	cmp al, 39h
 	je @@key_space
-	cmp al, 4bh
+	cmp al, 4bh	; cbh
 	je @@key_left
-	cmp al, 4dh
+	cmp al, 4dh	; cdh
 	je @@key_right
+	cmp al, 48h	; c8h
+	je @@key_up
+	cmp al, 50h	; d0h
+	je @@key_down
 
 	jmp skip
 
@@ -146,6 +150,14 @@ key_int proc near
 	jmp skip
 @@key_right:
 	mov al, 9
+	call to_buffer
+	jmp skip
+@@key_up:
+	mov al, 10
+	call to_buffer
+	jmp skip
+@@key_down:
+	mov al, 11
 	call to_buffer
 	jmp skip
 
@@ -343,13 +355,19 @@ begin endp
 timer_tick proc near
 	mov	bx, 0b800h
 	mov	es, bx
-
+	mov si, position
+	
 	mov bx, propeller_frame_current
 	inc bx
 	cmp bx, propeller_frame_count
 	jnz @@f
 
-	mov bx, 0
+; clear 
+	mov ax, under
+	mov di, position
+	stosw
+
+	mov bx, 0 ; frame 0
 	mov dl, direction
 	cmp dl, 0
 	jz @@f
@@ -363,36 +381,30 @@ timer_tick proc near
 	jz @@down
 
 @@left:
-	mov ax, under
-	mov di, position
-	stosw
-	mov si, position ; new position
+	; mov ax, under
+	; mov di, position
+	; stosw
 	sub si, 2
-	mov position, si
-	mov under, ax
+	; mov position, si
+	; lodsw todo update under
+	; mov under, ax
 	jmp @@f
 
 @@right:
-	mov ax, under
-	mov di, position
-	stosw
-	mov si, position ; new possition
 	add si, 2
-	mov position, si
-	; lodsw todo update under
-	mov under, ax
 	jmp @@f
-
 @@up:
+	sub si, screen_width
 	jmp @@f
-
 @@down:
+	add si, screen_width
 	jmp @@f
 
 @@f:
 	mov propeller_frame_current, bx
 	mov al, propeller_frames[bx]
 
+	mov position, si
 	mov	di, position ; screen char position
 
 	mov ah, 070h
