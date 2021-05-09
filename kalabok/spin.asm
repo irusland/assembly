@@ -51,6 +51,7 @@ screen_width equ 40 * 2
 screen_horizontal_mid equ screen_width / 2
 screen_height equ 25 
 screen_vertical_mid equ screen_height / 2
+screen_size equ screen_width * screen_height
 
 position dw screen_width * screen_vertical_mid + screen_horizontal_mid - 2
 
@@ -71,11 +72,9 @@ propeller_frame_end label	near            ;метка конца кода
 propeller_frame_count  equ     offset propeller_frame_end - offset propeller_frame_start
 propeller_frame_current dw 0
 
-is_spavka db 1
-
 cmd_vectors	dw 0h
 			dw offset timer_tick
-			dw offset spravka
+			dw offset switch_spravka
 			dw offset speed
 			dw offset speed
 			dw offset speed
@@ -302,8 +301,10 @@ mov dx, 16 ; table char (letter) offset
 mov bl, 0 ; font block (0-3)
 mov bh, 8 * 2 ; bytes per char
 int 10h
-; display page 
-; ccall spravka
+; display page
+ccall draw_spravka
+ccall switch_spravka
+
 
 @@1:
 	hlt ; TODO HALT FOR SLEEP
@@ -381,7 +382,7 @@ begin endp
 ; --------------------------------
 
 
-spravka proc near
+switch_spravka proc near
 	mov al, is_spavka
 	cmp al, 0
 	je to_spavka
@@ -401,7 +402,47 @@ switch_page:
 	int 10h
 	ret	
 
-spravka endp
+is_spavka db 0
+switch_spravka endp
+
+draw_spravka proc near
+	mov	bx, 0b800h
+	mov	es, bx
+	mov al, '1'
+	mov dx, screen_size + 48 ; 48 is magic const???
+	mov di, dx
+
+	xor cx, cx ; line
+	xor bx, bx ; char
+print_char:
+	mov al, spravka[bx]
+	cmp al, '$'
+	je newline
+ok:
+	mov ah, 0fh
+	stosw
+	jmp next
+newline:
+	inc cl
+	mov al, screen_width
+	mul cl  ; ax = cl * al
+	mov di, dx ; base
+	add di, ax ; + line
+	jmp next
+next:
+	inc bx
+	cmp bx, spravka_len
+	jnz print_char
+
+	ret
+
+
+spravka_start label
+spravka db '$ KALAB', 12h, 13h, 'K THE GAME$', '$', '   ESC - exit$', '   UP/DOWN/LEFT/RIGHT - walk$', '   F1 - info/game$', '   SPACE - stay$', '   NUMBER - speed$', 'rule$', 'rule$' , '$$$by irusland'
+spravka_end label
+
+spravka_len equ offset spravka_end - offset spravka_start
+draw_spravka endp
 
 
 timer_tick proc near
