@@ -566,14 +566,14 @@ timer_tick proc near
 	cmp ah, 0   ; |*   |  
 	jnz @@f
 	mov si, position
-	add si, screen_width - 2
+	add si, screen_width - 2 * 2
 	jmp @@f
 @@right:
 	add si, 2
-	cmp ah, screen_width - 2   ; |   *|  
+	cmp ah, screen_width - 2 * 2   ; |   *|  
 	jnz @@f
 	mov si, position
-	sub si, screen_width - 2
+	sub si, screen_width - 2 * 2
 	jmp @@f
 @@up:
 	sub si, screen_width
