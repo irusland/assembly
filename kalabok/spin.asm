@@ -61,7 +61,7 @@ max_ticks dw 3
 propeller_frame_start label near
 ; propeller_frames db '|/-\'
 ; propeller_frames db 179, '/', 196, '\'
-propeller_frames db 10h, 11h, 12h, 13h, 14h, 15h,  16h, 17h,  18h, 19h,  1ah, 1bh,  1ch, 1dh, 1eh
+propeller_frames db 10h, 11h, 12h, 13h, 14h, 15h,  16h, 17h,  18h, 19h,  1ah, 1bh,  1ch, 1dh, 1eh, 1fh
 ; propeller_frames db '.oO@*'
 ; propeller_frames db 'p', 'd', 'b', 'o'
 ; propeller_frames db '|[/-\]'
@@ -87,8 +87,8 @@ cmd_vectors	dw 0h
 
 ; --------------------------------
 direction db 0
-; under dw 7731h
-under dw 0
+under dw 0, 0 ; under left and right halfs ah-color; al-symbol
+
 change_direction proc
 	sub al, 7
 	mov direction, al
@@ -451,13 +451,15 @@ timer_tick proc near
 	mov si, position
 	
 	mov bx, propeller_frame_current
-	inc bx
+	add bx, 2
 	cmp bx, propeller_frame_count
 	jnz @@f
 
-; clear 
-	mov ax, under
+; clear under
 	mov di, position
+	mov ax, under[0]
+	stosw
+	mov ax, under[1]
 	stosw
 
 	mov ax, position
@@ -514,7 +516,9 @@ timer_tick proc near
 	mov	di, position ; screen char position
 
 	mov ah, 070h
-	stosw ; ax -> es:di	
+	stosw ; ax -> es:di
+	mov al, propeller_frames[bx + 1]
+	stosw ; ax -> es:di
 
 	ret
 timer_tick endp
