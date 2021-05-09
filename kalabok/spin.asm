@@ -89,17 +89,32 @@ cmd_vectors	dw 0h
 			dw offset change_direction
 			dw offset change_direction
 
+			dw offset step
+			dw offset step
+			dw offset step
+			dw offset step
+
 ; --------------------------------
 direction db 0
+is_autowalk db 0
 under dw 0, 0 ; under left and right halfs ah-color; al-symbol
 
 change_direction proc
 	sub al, 7
 	mov direction, al
+	mov is_autowalk, 1
 	ret
 change_direction endp
 
-key_int proc near
+step proc
+	sub al, 12
+	add al, 1 ; skipping 0 dir
+	mov direction, al
+	mov is_autowalk, 0
+	ret
+step endp
+
+key_int proc
 	push ax
 	push di
 	push es
@@ -135,6 +150,20 @@ key_int proc near
 	cmp al, 50h	; d0h
 	je @@key_down
 
+	cmp al, 1eh
+	je @@key_A
+	cmp al, 11h
+	je @@key_W
+	cmp al, 1fh
+	je @@key_S
+	cmp al, 20h
+	je @@key_D
+
+	jmp skip
+
+@@esc:
+	mov al, 0 ; command
+	call to_buffer
 	jmp skip
 
 @@key3:
@@ -175,8 +204,20 @@ key_int proc near
 	call to_buffer
 	jmp skip
 
-@@esc:
-	mov al, 0 ; 2nd command
+@@key_A:
+	mov al, 12
+	call to_buffer
+	jmp skip
+@@key_W:
+	mov al, 14
+	call to_buffer
+	jmp skip
+@@key_S:
+	mov al, 15
+	call to_buffer
+	jmp skip
+@@key_D:
+	mov al, 13
 	call to_buffer
 	jmp skip
 
@@ -328,10 +369,10 @@ ccall switch_spravka
 	; 9 - right
 	; 10 - up
 	; 11 - down
-	; 	autodir
-	;
-	;
-	; 
+	; 12 - A
+	; 13 - W
+	; 14 - S
+	; 15 - D
 
 
     jnc @@1   ; jump carry flag CF == 0
@@ -442,7 +483,7 @@ next:
 
 
 spravka_start label
-spravka db '$ KALAB', 12h, 13h, 'K THE GAME$', '$', '   ESC - exit$', '   UP/DOWN/LEFT/RIGHT - walk$', '   F1 - info/game$', '   SPACE - stay$', '   NUMBER - speed$', 'rule$', 'rule$' , '$$$by irusland'
+spravka db '$ KALAB', 12h, 13h, 'K THE GAME$', '$', '   ESC - exit$', '   F1 - info/game$', '   UP/DOWN/LEFT/RIGHT - auto walk$', '   A/W/S/D - step$', '   HOLD A/W/S/D - walk$', '   SPACE - stay$', '   NUMBER - speed$', 'rule$', 'rule$' , '$$$by irusland'
 spravka_end label
 
 spravka_len equ offset spravka_end - offset spravka_start
@@ -457,8 +498,10 @@ timer_tick proc near
 	mov bx, propeller_frame_current
 	add bx, 2
 	cmp bx, propeller_frame_count
-	jnz @@f
-
+	jnz @@continue
+@@reset_frames:
+	mov bx, 0 ; frame 0
+@@continue:
 ; clear under
 	mov di, position
 	mov ax, under[0]
@@ -470,7 +513,6 @@ timer_tick proc near
 	mov cl, screen_width
 	div cl ; al /     ah %
 
-	mov bx, 0 ; frame 0
 	mov dl, direction
 	cmp dl, 0
 	jz @@f
@@ -524,6 +566,10 @@ timer_tick proc near
 	mov al, propeller_frames[bx + 1]
 	stosw ; ax -> es:di
 
+	cmp is_autowalk, 1
+	je @@auto
+	mov direction, 0  ; AWSD step
+@@auto:
 	ret
 timer_tick endp
 
