@@ -546,7 +546,7 @@ timer_tick proc near
 
 	mov dl, direction
 	cmp dl, 0
-	jz @@f
+	jz @@stop
 	cmp dl, 1
 	jz @@left
 	cmp dl, 2
@@ -556,6 +556,10 @@ timer_tick proc near
 	cmp dl, 4
 	jz @@down
 
+@@stop:
+	xor bx, bx
+	mov propeller_frame_current, bx
+	jmp @@f
 @@left:
 	sub bx, 2
 	sub si, 2
