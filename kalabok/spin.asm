@@ -98,10 +98,13 @@ cmd_vectors	dw 0h
 			dw offset speed_keys
 
 			dw offset restart
+			dw offset dig
 
 ; --------------------------------
 direction db 0
 is_autowalk db 0
+is_digging db 0
+
 under dw 0, 0 ; under left and right halfs ah-color; al-symbol
 
 change_direction proc
@@ -145,6 +148,7 @@ restart proc
 	mov propeller_frame_current, 0
 	mov ticks,	0
 	mov max_ticks, 3
+	mov is_digging, 0
 	; buffer db 6 dup (0)
 	ccall draw_grass
 	ret
@@ -162,6 +166,17 @@ draw_grass proc
 	loop @@l
 	ret
 draw_grass endp
+
+dig proc
+	cmp is_digging, 0
+	je @@to_dig
+	mov is_digging, 0
+	jmp @@f
+@@to_dig:
+	mov is_digging, 1
+@@f:
+	ret
+dig endp
 
 key_int proc
 	push ax
@@ -214,14 +229,16 @@ key_int proc
 	je @@plus
 
 	cmp al, 0eh
-	je @@restart
+	je @@backspace
+
+	cmp al, 1ch
+	je @@enter
 
 	jmp skip
 
 @@esc:
 	mov al, 0 ; command
-	call to_buffer
-	jmp skip
+	jmp save
 
 @@key3:
 	inc cl
@@ -232,66 +249,58 @@ key_int proc
 @@key0:
 	add cl, 3 ; base cmd
 	mov al, cl
-	call to_buffer
-	jmp skip
+	jmp save
 
 @@key_spravka:
 	mov al, 2
-	call to_buffer
-	jmp skip
+	jmp save
 
 @@key_space:
 	mov al, 7
-	call to_buffer
-	jmp skip
+	jmp save
 @@key_left:
 	mov al, 8
-	call to_buffer
-	jmp skip
+	jmp save
 @@key_right:
 	mov al, 9
-	call to_buffer
-	jmp skip
+	jmp save
 @@key_up:
 	mov al, 10
-	call to_buffer
-	jmp skip
+	jmp save
 @@key_down:
 	mov al, 11
-	call to_buffer
-	jmp skip
+	jmp save
 
 @@key_A:
 	mov al, 12
-	call to_buffer
-	jmp skip
+	jmp save
 @@key_W:
 	mov al, 14
-	call to_buffer
-	jmp skip
+	jmp save
 @@key_S:
 	mov al, 15
-	call to_buffer
-	jmp skip
+	jmp save
 @@key_D:
 	mov al, 13
-	call to_buffer
-	jmp skip
+	jmp save
 
 @@minus:
 	mov al, 16
-	call to_buffer
-	jmp skip
+	jmp save
 @@plus:
 	mov al, 17
-	call to_buffer
-	jmp skip
+	jmp save
 
-@@restart:
+@@backspace:
 	mov al, 18
-	call to_buffer
-	jmp skip
+	jmp save
 
+@@enter:
+	mov al, 19
+	jmp save
+
+save:
+	call to_buffer
 skip:
 	pop	es
 	pop di
@@ -448,6 +457,7 @@ ccall restart
 	; 16 - -
 	; 17 - +
 	; 18 - reload
+	; 19 - dig
 
 
     jnc @@1   ; jump carry flag CF == 0
@@ -558,7 +568,7 @@ next:
 
 
 spravka_start label
-spravka db '$ KALAB', 12h, 13h, 'K THE GAME$', '$', '   ESC - exit$', '   F1 - info/game$', '   UP/DOWN/LEFT/RIGHT - auto walk$', '   A/W/S/D - step$', '   HOLD A/W/S/D - walk$', '   SPACE - stay$', '   1...4 - delay$', '   0 - stop$',  '   -/+ - delay$', 'BACKSPACE - restart$', 'rule$' , '$$$by irusland'
+spravka db '$ KALAB', 12h, 13h, 'K THE GAME$', '$', '   ESC - exit$', '   F1 - info/game$', '   UP/DOWN/LEFT/RIGHT - auto walk$', '   A/W/S/D - step$', '   HOLD A/W/S/D - walk$', '   SPACE - stay$', '   1...4 - delay$', '   0 - stop$',  '   -/+ - delay$', '   BACKSPACE - restart$', '   ENTER - dig mode$' , '$$$by irusland'
 spravka_end label
 
 spravka_len equ offset spravka_end - offset spravka_start
@@ -571,13 +581,6 @@ timer_tick proc near
 	mov si, position
 	
 	mov bx, propeller_frame_current
-
-; clear under
-	mov di, position
-	mov ax, under[0]
-	stosw
-	mov ax, under[1]
-	stosw
 
 	mov ax, position
 	mov cl, screen_width
@@ -644,13 +647,47 @@ timer_tick proc near
 @@reset_frames_end:
 	mov bx, propeller_frame_count - 2
 @@ok:
-	mov propeller_frame_current, bx
-	mov al, propeller_frames[bx]
+	; recover under
+	mov di, position
+	mov ax, under[1]
+	cmp ax, 0
+	je @@under_skip
+	stosw
+	mov ax, under[0]
+	stosw
+@@under_skip:
+
+	; save under
+	push ds
+	push si
+	mov cx, 0b800h
+	mov ds, cx
+	lodsw ; ax <- ds:si
+	mov cx, ax
+	lodsw ; ax <- ds:si
+	pop si
+	pop ds
+	mov under[1], cx
+	mov under[0], ax
+	
+	cmp is_digging, 0
+	je @@no_dig
+	mov ah, 60h
+	mov al, 0
+	; stosw
+	; stosw
+	; dec di
+	; dec di
+	mov under[0], ax
+	mov under[1], ax
+@@no_dig:
 
 	mov position, si
 	mov	di, position ; screen char position
 
 	mov ah, 070h
+	mov propeller_frame_current, bx
+	mov al, propeller_frames[bx]
 	stosw ; ax -> es:di
 	mov al, propeller_frames[bx + 1]
 	stosw ; ax -> es:di
