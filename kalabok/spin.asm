@@ -59,8 +59,8 @@ max_ticks dw 3
 
 propeller_frame_start label near
 ; propeller_frames db '|/-\'
-propeller_frames db 179, '/', 196, '\'
-; propeller_frames db 186, 201, 205, 187
+; propeller_frames db 179, '/', 196, '\'
+propeller_frames db 10h,  12h, 14h,   16h,   18h,   1ah,   1ch,  1eh
 ; propeller_frames db '.oO@*'
 ; propeller_frames db 'p', 'd', 'b', 'o'
 ; propeller_frames db '|[/-\]'
@@ -271,6 +271,8 @@ begin proc near
 	sti
 
 ;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+push es
 ; перевести видеоподсистему в режим №1
 mov ah, 00h
 mov al, 1
@@ -280,9 +282,18 @@ mov ah, 01h
 mov ch, 01h
 mov cl, 00h
 int 10h
-;
+; load sprites
+mov ah, 11h
+mov al, 00h ; user font
+mov bx, ds
+mov es, bx ; es:bp table
+mov bp, sprite
+mov cx, sprites_count * sprite_parts ; char count 
+mov dx, 16 ; table char (letter) offset
+mov bl, 0 ; font block (0-3)
+mov bh, 8 * 2 ; bytes per char
+int 10h
 
-push es
 @@1:
 	hlt ; TODO HALT FOR SLEEP
     ; exits if interrupt occurs
@@ -510,5 +521,20 @@ from_buffer proc near ; buffer[head] -> al
 
 from_buffer endp
 ; --------------------------------
+
+; SPRITES -----
+sprite_parts equ 2
+sprite_part_size equ 16
+sprites_count equ 8
+sprite_size equ sprite_part_size * sprite_parts
+sprites_size equ sprite_size * sprites_count
+
+sprites_start label
+include sprite.asm
+sprites_end label
+
+sprites_max equ offset sprites_end
+sprite dw offset sprites_start
+; SPRITES -----
 
 end _start
