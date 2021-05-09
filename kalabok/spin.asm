@@ -94,6 +94,9 @@ cmd_vectors	dw 0h
 			dw offset step
 			dw offset step
 
+			dw offset speed_keys
+			dw offset speed_keys
+
 ; --------------------------------
 direction db 0
 is_autowalk db 0
@@ -113,6 +116,23 @@ step proc
 	mov is_autowalk, 0
 	ret
 step endp
+
+speed_keys proc
+	sub al, 16
+	mov ah, 2
+	mul ah
+	dec ax ; -1 1
+
+	mov bx, max_ticks
+	add bx, ax
+	cmp bx, 0
+	jl @@nothing
+	cmp bx, 9
+	jg @@nothing
+	mov max_ticks, bx
+@@nothing:
+	ret
+speed_keys endp
 
 key_int proc
 	push ax
@@ -158,6 +178,11 @@ key_int proc
 	je @@key_S
 	cmp al, 20h
 	je @@key_D
+
+	cmp al, 0ch
+	je @@minus
+	cmp al, 0dh
+	je @@plus
 
 	jmp skip
 
@@ -218,6 +243,15 @@ key_int proc
 	jmp skip
 @@key_D:
 	mov al, 13
+	call to_buffer
+	jmp skip
+
+@@minus:
+	mov al, 16
+	call to_buffer
+	jmp skip
+@@plus:
+	mov al, 17
 	call to_buffer
 	jmp skip
 
@@ -373,6 +407,8 @@ ccall switch_spravka
 	; 13 - W
 	; 14 - S
 	; 15 - D
+	; 16 - -
+	; 17 - +
 
 
     jnc @@1   ; jump carry flag CF == 0
@@ -483,7 +519,7 @@ next:
 
 
 spravka_start label
-spravka db '$ KALAB', 12h, 13h, 'K THE GAME$', '$', '   ESC - exit$', '   F1 - info/game$', '   UP/DOWN/LEFT/RIGHT - auto walk$', '   A/W/S/D - step$', '   HOLD A/W/S/D - walk$', '   SPACE - stay$', '   NUMBER - speed$', 'rule$', 'rule$' , '$$$by irusland'
+spravka db '$ KALAB', 12h, 13h, 'K THE GAME$', '$', '   ESC - exit$', '   F1 - info/game$', '   UP/DOWN/LEFT/RIGHT - auto walk$', '   A/W/S/D - step$', '   HOLD A/W/S/D - walk$', '   SPACE - stay$', '   1...4 - delay$', '   0 - stop$',  '   -/+ - delay$', 'rule$', 'rule$' , '$$$by irusland'
 spravka_end label
 
 spravka_len equ offset spravka_end - offset spravka_start
