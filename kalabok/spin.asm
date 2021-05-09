@@ -47,7 +47,11 @@ head	dw	offset buffer
 tail	dw	offset buffer
 
 
-screen_width equ 80 * 2
+; 0: 40x25   1: 80x25
+mode equ 1
+
+video_mode equ mode * 2 + 1
+screen_width equ 40 * 2 * (mode + 1)
 screen_horizontal_mid equ screen_width / 2
 screen_height equ 25
 screen_vertical_mid equ screen_height / 2
@@ -283,7 +287,7 @@ begin proc near
 push es
 ; перевести видеоподсистему в режим №1
 mov ah, 00h
-mov al, 3
+mov al, video_mode
 int 10h
 ; ; убрать курсор
 mov ah, 01h
@@ -409,7 +413,7 @@ draw_spravka proc near
 	mov	bx, 0b800h
 	mov	es, bx
 	mov al, '1'
-	mov dx, screen_size + 48 * 2 ; 48 is magic const???
+	mov dx, screen_size + 48 * (mode+1) ; 48 is magic const???
 	mov di, dx
 
 	xor cx, cx ; line
