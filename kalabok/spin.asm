@@ -532,12 +532,7 @@ timer_tick proc near
 	mov si, position
 	
 	mov bx, propeller_frame_current
-	add bx, 2
-	cmp bx, propeller_frame_count
-	jnz @@continue
-@@reset_frames:
-	mov bx, 0 ; frame 0
-@@continue:
+
 ; clear under
 	mov di, position
 	mov ax, under[0]
@@ -562,6 +557,7 @@ timer_tick proc near
 	jz @@down
 
 @@left:
+	sub bx, 2
 	sub si, 2
 	cmp ah, 0   ; |*   |  
 	jnz @@f
@@ -569,6 +565,7 @@ timer_tick proc near
 	add si, screen_width - 2 * 2
 	jmp @@f
 @@right:
+	add bx, 2
 	add si, 2
 	cmp ah, screen_width - 2 * 2   ; |   *|  
 	jnz @@f
@@ -576,6 +573,7 @@ timer_tick proc near
 	sub si, screen_width - 2 * 2
 	jmp @@f
 @@up:
+	sub bx, 2
 	sub si, screen_width
 	cmp al, 0
 	jnz @@f
@@ -583,6 +581,7 @@ timer_tick proc near
 	add si, screen_width * (screen_height - 1)
 	jmp @@f
 @@down:
+	add bx, 2
 	add si, screen_width
 	cmp al, screen_height - 1
 	jnz @@f
@@ -591,6 +590,17 @@ timer_tick proc near
 	jmp @@f
 
 @@f:
+	cmp bx, propeller_frame_count
+	jge @@reset_frames_start
+	cmp bx, 0
+	jl @@reset_frames_end
+	jmp @@ok
+@@reset_frames_start:
+	mov bx, 0 ; frame 0
+	jmp @@ok
+@@reset_frames_end:
+	mov bx, propeller_frame_count - 2
+@@ok:
 	mov propeller_frame_current, bx
 	mov al, propeller_frames[bx]
 
