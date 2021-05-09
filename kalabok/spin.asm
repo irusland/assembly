@@ -47,9 +47,9 @@ head	dw	offset buffer
 tail	dw	offset buffer
 
 
-screen_width equ 40 * 2
+screen_width equ 80 * 2
 screen_horizontal_mid equ screen_width / 2
-screen_height equ 25 
+screen_height equ 25
 screen_vertical_mid equ screen_height / 2
 screen_size equ screen_width * screen_height
 
@@ -61,7 +61,7 @@ max_ticks dw 3
 propeller_frame_start label near
 ; propeller_frames db '|/-\'
 ; propeller_frames db 179, '/', 196, '\'
-propeller_frames db 10h,  12h, 14h,   16h,   18h,   1ah,   1ch,  1eh
+propeller_frames db 10h, 11h, 12h, 13h, 14h, 15h,  16h, 17h,  18h, 19h,  1ah, 1bh,  1ch, 1dh, 1eh
 ; propeller_frames db '.oO@*'
 ; propeller_frames db 'p', 'd', 'b', 'o'
 ; propeller_frames db '|[/-\]'
@@ -283,7 +283,7 @@ begin proc near
 push es
 ; перевести видеоподсистему в режим №1
 mov ah, 00h
-mov al, 1
+mov al, 3
 int 10h
 ; ; убрать курсор
 mov ah, 01h
@@ -409,7 +409,7 @@ draw_spravka proc near
 	mov	bx, 0b800h
 	mov	es, bx
 	mov al, '1'
-	mov dx, screen_size + 48 ; 48 is magic const???
+	mov dx, screen_size + 48 * 2 ; 48 is magic const???
 	mov di, dx
 
 	xor cx, cx ; line
