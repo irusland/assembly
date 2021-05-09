@@ -71,9 +71,11 @@ propeller_frame_end label	near            ;метка конца кода
 propeller_frame_count  equ     offset propeller_frame_end - offset propeller_frame_start
 propeller_frame_current dw 0
 
+is_spavka db 1
+
 cmd_vectors	dw 0h
 			dw offset timer_tick
-			dw 0h
+			dw offset spravka
 			dw offset speed
 			dw offset speed
 			dw offset speed
@@ -117,6 +119,8 @@ key_int proc near
 	je @@key2
 	cmp al, 04h
 	je @@key3
+	cmp al, 3bh
+	je @@key_spravka
 	cmp al, 39h
 	je @@key_space
 	cmp al, 4bh	; cbh
@@ -139,6 +143,11 @@ key_int proc near
 @@key0:
 	add cl, 3 ; base cmd
 	mov al, cl
+	call to_buffer
+	jmp skip
+
+@@key_spravka:
+	mov al, 2
 	call to_buffer
 	jmp skip
 
@@ -293,6 +302,8 @@ mov dx, 16 ; table char (letter) offset
 mov bl, 0 ; font block (0-3)
 mov bh, 8 * 2 ; bytes per char
 int 10h
+; display page 
+; ccall spravka
 
 @@1:
 	hlt ; TODO HALT FOR SLEEP
@@ -302,7 +313,7 @@ int 10h
     call from_buffer ; al <- if carry
 	; 0 - exit
 	; 1 - timer
-	; 2 - 
+	; 2 - spravka/game
 	; 3 - speed 0
 	; 4 - 1
 	; 5 - 2
@@ -312,6 +323,10 @@ int 10h
 	; 9 - right
 	; 10 - up
 	; 11 - down
+	; 	autodir
+	;
+	;
+	; 
 
 
     jnc @@1   ; jump carry flag CF == 0
@@ -364,6 +379,30 @@ speed:
     ret
 begin endp
 ; --------------------------------
+
+
+spravka proc near
+	mov al, is_spavka
+	cmp al, 0
+	je to_spavka
+	jmp to_game
+to_spavka:
+	mov al, 1
+	mov is_spavka, al
+	jmp switch_page
+to_game:
+	mov al, 0
+	mov is_spavka, al
+	jmp switch_page
+
+switch_page:
+	mov ah, 05h
+	mov al, is_spavka
+	int 10h
+	ret	
+
+spravka endp
+
 
 timer_tick proc near
 	mov	bx, 0b800h
