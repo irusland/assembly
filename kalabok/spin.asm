@@ -97,6 +97,8 @@ cmd_vectors	dw 0h
 			dw offset speed_keys
 			dw offset speed_keys
 
+			dw offset restart
+
 ; --------------------------------
 direction db 0
 is_autowalk db 0
@@ -133,6 +135,33 @@ speed_keys proc
 @@nothing:
 	ret
 speed_keys endp
+
+restart proc
+	mov position, screen_width * screen_vertical_mid + screen_horizontal_mid - 2
+	mov direction, 0
+	mov is_autowalk, 0
+	mov under[0], 0
+	mov under[1], 0
+	mov propeller_frame_current, 0
+	mov ticks,	0
+	mov max_ticks, 3
+	; buffer db 6 dup (0)
+	ccall draw_grass
+	ret
+restart endp
+
+draw_grass proc
+	mov bx, 0b800h
+	mov es, bx
+	mov ah, 20h
+	mov al, 0h
+	xor di, di
+	mov cx, screen_width * screen_height / 2
+@@l:
+	stosw
+	loop @@l
+	ret
+draw_grass endp
 
 key_int proc
 	push ax
@@ -183,6 +212,9 @@ key_int proc
 	je @@minus
 	cmp al, 0dh
 	je @@plus
+
+	cmp al, 0eh
+	je @@restart
 
 	jmp skip
 
@@ -252,6 +284,11 @@ key_int proc
 	jmp skip
 @@plus:
 	mov al, 17
+	call to_buffer
+	jmp skip
+
+@@restart:
+	mov al, 18
 	call to_buffer
 	jmp skip
 
@@ -384,6 +421,7 @@ int 10h
 ccall draw_spravka
 ccall switch_spravka
 
+ccall restart
 
 @@1:
 	hlt ; TODO HALT FOR SLEEP
@@ -409,6 +447,7 @@ ccall switch_spravka
 	; 15 - D
 	; 16 - -
 	; 17 - +
+	; 18 - reload
 
 
     jnc @@1   ; jump carry flag CF == 0
@@ -519,7 +558,7 @@ next:
 
 
 spravka_start label
-spravka db '$ KALAB', 12h, 13h, 'K THE GAME$', '$', '   ESC - exit$', '   F1 - info/game$', '   UP/DOWN/LEFT/RIGHT - auto walk$', '   A/W/S/D - step$', '   HOLD A/W/S/D - walk$', '   SPACE - stay$', '   1...4 - delay$', '   0 - stop$',  '   -/+ - delay$', 'rule$', 'rule$' , '$$$by irusland'
+spravka db '$ KALAB', 12h, 13h, 'K THE GAME$', '$', '   ESC - exit$', '   F1 - info/game$', '   UP/DOWN/LEFT/RIGHT - auto walk$', '   A/W/S/D - step$', '   HOLD A/W/S/D - walk$', '   SPACE - stay$', '   1...4 - delay$', '   0 - stop$',  '   -/+ - delay$', 'BACKSPACE - restart$', 'rule$' , '$$$by irusland'
 spravka_end label
 
 spravka_len equ offset spravka_end - offset spravka_start
