@@ -213,6 +213,24 @@ draw_grass proc
 	add di, screen_width - 4
 	loop @@vline
 
+	mov di, screen_width * 2 + screen_width / 4
+	mov ah, wall_color
+	mov al, wall_char
+	mov cx, screen_height / 4
+@@vline2:
+	stosw
+	stosw
+	add di, screen_width - 4
+	loop @@vline2
+
+	mov di, screen_width * 4 + screen_width / 8
+	mov ah, wall_color
+	mov al, wall_char
+	mov cx, screen_width / 8
+@@hline2:
+	stosw
+	loop @@hline2
+
 	ret
 draw_grass endp
 
@@ -866,7 +884,7 @@ next:
 
 
 spravka_start label
-spravka db '$ KALAB', 12h, 13h, 'K THE GAME$', '$', '   ESC - exit$', '   F1 - info/game$', '   UP/DOWN/LEFT/RIGHT - auto walk$', '   A/W/S/D - step$', '   HOLD A/W/S/D - walk$', '   SPACE - stay$', '   1...4 - delay$', '   0 - stop$',  '   -/+ - delay$', '   BACKSPACE - restart$', '   ENTER - dig mode$' , '$$$by irusland'
+spravka db '$ KALAB', 12h, 13h, 'K THE GAME$', '$', '   ESC - exit$', '   F1 - info/game$', '   UP/DOWN/LEFT/RIGHT - auto walk$', '   A/W/S/D - step$', '   HOLD A/W/S/D - walk$', '   SPACE - stay$', '   1...4 - delay$', '   0 - stop$',  '   -/+ - delay$', '   BACKSPACE - restart$', '   ENTER - dig mode$' , '   TAB - auto walk$' , '$$$by irusland'
 spravka_end label
 
 spravka_len equ offset spravka_end - offset spravka_start
