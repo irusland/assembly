@@ -647,13 +647,25 @@ timer_tick proc near
 @@reset_frames_end:
 	mov bx, propeller_frame_count - 2
 @@ok:
+	cmp is_digging, 0
+	je @@no_dig
+	mov al, 0h
+	mov ah, 60h
+	; stosw
+	; stosw
+	; dec di
+	; dec di
+	mov under + 2, ax
+	mov under, ax
+@@no_dig:
+
 	; recover under
 	mov di, position
-	mov ax, under[1]
+	mov ax, under + 2
 	cmp ax, 0
 	je @@under_skip
 	stosw
-	mov ax, under[0]
+	mov ax, under
 	stosw
 @@under_skip:
 
@@ -667,20 +679,8 @@ timer_tick proc near
 	lodsw ; ax <- ds:si
 	pop si
 	pop ds
-	mov under[1], cx
-	mov under[0], ax
-	
-	cmp is_digging, 0
-	je @@no_dig
-	mov ah, 60h
-	mov al, 0
-	; stosw
-	; stosw
-	; dec di
-	; dec di
-	mov under[0], ax
-	mov under[1], ax
-@@no_dig:
+	mov under + 2, cx
+	mov under, ax
 
 	mov position, si
 	mov	di, position ; screen char position
