@@ -647,19 +647,17 @@ timer_tick proc near
 @@reset_frames_end:
 	mov bx, propeller_frame_count - 2
 @@ok:
+
+	; if digging
 	cmp is_digging, 0
 	je @@no_dig
 	mov al, 0h
 	mov ah, 60h
-	; stosw
-	; stosw
-	; dec di
-	; dec di
 	mov under + 2, ax
 	mov under, ax
 @@no_dig:
 
-	; recover under
+	; draw under curr
 	mov di, position
 	mov ax, under + 2
 	cmp ax, 0
@@ -669,7 +667,7 @@ timer_tick proc near
 	stosw
 @@under_skip:
 
-	; save under
+	; save under next
 	push ds
 	push si
 	mov cx, 0b800h
@@ -685,10 +683,11 @@ timer_tick proc near
 	mov position, si
 	mov	di, position ; screen char position
 
-	mov ah, 070h
+	mov ax, under + 2
 	mov propeller_frame_current, bx
 	mov al, propeller_frames[bx]
 	stosw ; ax -> es:di
+	mov ax, under
 	mov al, propeller_frames[bx + 1]
 	stosw ; ax -> es:di
 
