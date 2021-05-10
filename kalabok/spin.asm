@@ -224,17 +224,85 @@ ai_walk proc
 	ret
 ai_walk endp
 
-find_free_neighbour proc
-	mov cl, 3 ; direction l r u d
+direction_left db 1
+direction_right db 2
+direction_up db 3
+direction_down db 4
+
+find_free_neighbour_left_hand proc
+	; L R U D
+	; 1 2 3 4
+	mov direction_left, 1
+	mov direction_right, 2
+	mov direction_up, 3
+	mov direction_down, 4
+
+;	\/ 4
+	; L R U D
+	; 2 1 4 3
+	cmp direction, 4
+	jne @@next1
+	mov direction_left, 2
+	mov direction_right, 1
+	mov direction_up, 4
+	mov direction_down, 3
+	jmp @@find
+@@next1:
+
+;	> 2
+	; L R U D
+	; 3 4 2 1
+	cmp direction, 2
+	jne @@next2
+	mov direction_left, 3
+	mov direction_right, 4
+	mov direction_up, 2
+	mov direction_down, 1
+	jmp @@find
+@@next2:
+
+;	^ 3
+	; L R U D
+	; 1 2 3 4
+	cmp direction, 3
+	jne @@next3
+	mov direction_left, 1
+	mov direction_right, 2
+	mov direction_up, 3
+	mov direction_down, 4
+	jmp @@find
+@@next3:
+	
+;	< 1
+	; L R U D
+	; 4 3 1 2
+	cmp direction, 1
+	jne @@next4
+	mov direction_left, 4
+	mov direction_right, 3
+	mov direction_up, 1
+	mov direction_down, 2
+	jmp @@find
+@@next4:
+
+@@find:
+	;  Always turn left if you can
+	mov cl, direction_left
 	call check_direction_free
 	jc @@free_found
-	mov cl, 2 ; direction l r u d
+
+	; If you cannot turn left, go straight
+	mov cl, direction_up
 	call check_direction_free
 	jc @@free_found
-	mov cl, 4 ; direction l r u d
+
+	; If you cannot turn left, or go straight, turn right
+	mov cl, direction_right
 	call check_direction_free
 	jc @@free_found
-	mov cl, 1 ; direction l r u d
+
+	; If you cannot turn left, go straight, or turn right, turn around because you must be at a dead end
+	mov cl, direction_down
 	call check_direction_free
 	jc @@free_found
 
@@ -244,7 +312,64 @@ find_free_neighbour proc
 @@free_found:
 	stc
 	ret
-find_free_neighbour endp
+find_free_neighbour_left_hand endp
+
+find_free_neighbour_right_hand proc
+	; L R U D
+	; 1 2 3 4
+
+	;  |
+	; K|
+	mov cl, 2
+	call check_direction_free
+	jc @@next3
+	mov cl, 3
+	call check_direction_free
+	jnc @@next3
+	jmp @@free_found
+@@next3:
+
+
+	; __
+	;  K
+	mov cl, 3
+	call check_direction_free
+	jc @@next4
+	mov cl, 1
+	call check_direction_free
+	jnc @@next4
+	jmp @@free_found
+@@next4:
+
+	; |K
+	; |
+	mov cl, 1
+	call check_direction_free
+	jc @@next
+	mov cl, 4
+	call check_direction_free
+	jnc @@next
+	jmp @@free_found
+@@next:
+
+	; K
+	; __
+	mov cl, 4
+	call check_direction_free
+	jc @@next2
+	mov cl, 2
+	call check_direction_free
+	jnc @@next2
+	jmp @@free_found
+@@next2:
+
+@@not_found:
+	clc
+	ret
+@@free_found:
+	stc
+	ret
+find_free_neighbour_right_hand endp
 
 check_direction_free proc
 	call get_next_position
@@ -738,7 +863,7 @@ timer_tick proc near
 	cmp is_ai_walk, 1
 	jne @@human
 	cli
-	call find_free_neighbour
+	call find_free_neighbour_left_hand
 	sti
 	jnc @@not_found
 	mov direction, cl
