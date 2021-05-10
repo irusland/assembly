@@ -116,6 +116,10 @@ wall_char db 0b0h
 grass_color db 20h
 dirt_color db 60h
 
+move_count db 0
+egg_pos dw screen_width * screen_vertical_mid + screen_horizontal_mid - 2
+score dw 0
+
 change_direction proc
 	sub al, 7
 	mov direction, al
@@ -159,6 +163,9 @@ restart proc
 	mov direction_up, 3
 	mov direction_down, 4
 	mov is_autowalk, 0
+	mov move_count, 0
+	mov egg_pos, screen_width * screen_vertical_mid + screen_horizontal_mid - 2
+	mov score, 0
 	mov under[0], 0
 	mov under[2], 0
 	mov propeller_frame_current, 0
@@ -397,6 +404,34 @@ get_next_position proc
 	pop es
 	ret
 get_next_position endp
+
+spawn_egg proc
+	mov al, move_count
+	inc al
+	cmp move_count, 10
+	jl @@not_ready
+	ccall draw_egg
+	mov ax, position
+	mov egg_pos, ax ; save pos for later
+	xor ax,	ax
+@@not_ready:
+	mov move_count, al
+	ret
+spawn_egg endp
+
+draw_egg proc
+	mov bx, 0b800h
+	mov es, bx
+	mov di, egg_pos
+	; mov es, di
+	mov ah, 0eh
+	mov al, '0'
+	stosw
+	stosw
+	stosw
+
+	ret
+draw_egg endp
 
 key_int proc
 	push ax
@@ -822,8 +857,6 @@ timer_tick proc near
 	mov is_autowalk, 0
 	mov direction, 0
 @@human:
-
-
 	mov	bx, 0b800h
 	mov	es, bx
 	mov si, position
@@ -837,6 +870,9 @@ timer_tick proc near
 	mov dl, direction
 	cmp dl, 0
 	jz @@stop
+	
+	ccall spawn_egg ; has direction
+
 	cmp dl, 1
 	jz @@left
 	cmp dl, 2
