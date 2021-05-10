@@ -61,6 +61,7 @@ position dw screen_width * screen_vertical_mid + screen_horizontal_mid - 2
 
 ticks	dw	0
 max_ticks dw 3
+old_max_ticks dw max_ticks
 
 propeller_frame_start label near
 ; propeller_frames db '|/-\'
@@ -148,6 +149,8 @@ restart proc
 	mov propeller_frame_current, 0
 	mov ticks,	0
 	mov max_ticks, 3
+	mov ax, max_ticks
+	mov old_max_ticks, ax
 	mov is_digging, 0
 	; buffer db 6 dup (0)
 	ccall draw_grass
@@ -520,10 +523,15 @@ switch_spravka proc near
 to_spavka:
 	mov al, 1
 	mov is_spavka, al
+	mov ax, max_ticks
+	mov old_max_ticks, ax
+	mov max_ticks, 0
 	jmp switch_page
 to_game:
 	mov al, 0
 	mov is_spavka, al
+	mov ax, old_max_ticks
+	mov max_ticks, ax
 	jmp switch_page
 
 switch_page:
