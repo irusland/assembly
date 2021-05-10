@@ -120,6 +120,7 @@ change_direction proc
 	sub al, 7
 	mov direction, al
 	mov is_autowalk, 1
+	mov is_ai_walk, 0
 	ret
 change_direction endp
 
@@ -128,6 +129,7 @@ step proc
 	add al, 1 ; skipping 0 dir
 	mov direction, al
 	mov is_autowalk, 0
+	mov is_ai_walk, 0
 	ret
 step endp
 
@@ -152,6 +154,10 @@ restart proc
 	mov position, screen_width * screen_vertical_mid + screen_horizontal_mid - 2
 	mov direction, 0
 	mov is_ai_walk, 0
+	mov direction_left, 1
+	mov direction_right, 2
+	mov direction_up, 3
+	mov direction_down, 4
 	mov is_autowalk, 0
 	mov under[0], 0
 	mov under[2], 0
@@ -313,63 +319,6 @@ find_free_neighbour_left_hand proc
 	stc
 	ret
 find_free_neighbour_left_hand endp
-
-find_free_neighbour_right_hand proc
-	; L R U D
-	; 1 2 3 4
-
-	;  |
-	; K|
-	mov cl, 2
-	call check_direction_free
-	jc @@next3
-	mov cl, 3
-	call check_direction_free
-	jnc @@next3
-	jmp @@free_found
-@@next3:
-
-
-	; __
-	;  K
-	mov cl, 3
-	call check_direction_free
-	jc @@next4
-	mov cl, 1
-	call check_direction_free
-	jnc @@next4
-	jmp @@free_found
-@@next4:
-
-	; |K
-	; |
-	mov cl, 1
-	call check_direction_free
-	jc @@next
-	mov cl, 4
-	call check_direction_free
-	jnc @@next
-	jmp @@free_found
-@@next:
-
-	; K
-	; __
-	mov cl, 4
-	call check_direction_free
-	jc @@next2
-	mov cl, 2
-	call check_direction_free
-	jnc @@next2
-	jmp @@free_found
-@@next2:
-
-@@not_found:
-	clc
-	ret
-@@free_found:
-	stc
-	ret
-find_free_neighbour_right_hand endp
 
 check_direction_free proc
 	call get_next_position
