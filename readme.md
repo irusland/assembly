@@ -1,3 +1,10 @@
+# My assembly projects
+
+[Kalabok](/kalabok)
+![gif](/kalabok/kalabok.gif)
+
+
+```
 as -o dka.o dka.s
  
 ld -o dka dka.o -lSystem
@@ -18,3 +25,4 @@ vim /usr/include/x86_64-linux-gnu/asm/unistd_64.h
 
 
 gcc info.C -lstdc++
+```
