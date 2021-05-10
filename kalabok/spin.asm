@@ -108,6 +108,11 @@ is_digging db 0
 
 under dw 0, 0 ; under left and right halfs ah-color; al-symbol
 
+wall_color db 0c0h
+wall_char db 0b0h
+grass_color db 20h
+dirt_color db 60h
+
 change_direction proc
 	sub al, 7
 	mov direction, al
@@ -160,13 +165,22 @@ restart endp
 draw_grass proc
 	mov bx, 0b800h
 	mov es, bx
-	mov ah, 20h
+	mov ah, grass_color
 	mov al, 0h
 	xor di, di
-	mov cx, screen_width * screen_height / 2
+	mov cx, screen_width / 2 * screen_height
 @@l:
 	stosw
 	loop @@l
+
+; draw walls
+	mov di, screen_width * (screen_height - 1) + screen_width / 2
+	mov ah, wall_color
+	mov al, wall_char
+	mov cx, screen_width / 4
+@@line:
+	stosw
+	loop @@line
 	ret
 draw_grass endp
 
@@ -656,11 +670,26 @@ timer_tick proc near
 	mov bx, propeller_frame_count - 2
 @@ok:
 
+	; check walls
+	push ds
+	push si
+	mov cx, 0b800h
+	mov ds, cx
+	lodsw ; ax <- ds:si
+	mov cx, ax
+	lodsw ; ax <- ds:si
+	pop si
+	pop ds
+	cmp ah, wall_color
+	je @@restricted
+	cmp ch, wall_color
+	je @@restricted
+
 	; if digging
 	cmp is_digging, 0
 	je @@no_dig
 	mov al, 0h
-	mov ah, 60h
+	mov ah, dirt_color
 	mov under + 2, ax
 	mov under, ax
 @@no_dig:
@@ -691,6 +720,7 @@ timer_tick proc near
 	mov under, ax
 
 	mov position, si
+@@restricted:
 	mov	di, position ; screen char position
 
 	mov ax, under + 2
