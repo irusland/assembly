@@ -101,9 +101,12 @@ cmd_vectors	dw 0h
 			dw offset restart
 			dw offset dig
 
+			dw offset ai_walk
+
 ; --------------------------------
 direction db 0
 is_autowalk db 0
+is_ai_walk db 0
 is_digging db 0
 
 under dw 0, 0 ; under left and right halfs ah-color; al-symbol
@@ -148,6 +151,7 @@ speed_keys endp
 restart proc
 	mov position, screen_width * screen_vertical_mid + screen_horizontal_mid - 2
 	mov direction, 0
+	mov is_ai_walk, 0
 	mov is_autowalk, 0
 	mov under[0], 0
 	mov under[2], 0
@@ -206,6 +210,120 @@ dig proc
 	ret
 dig endp
 
+ai_walk proc
+	cmp is_ai_walk, 0
+	je @@to_ai
+	mov is_ai_walk, 0
+	mov direction, 0
+	mov is_autowalk, 0
+	jmp @@f
+@@to_ai:
+	mov is_ai_walk, 1
+	mov is_autowalk, 1
+@@f:
+	ret
+ai_walk endp
+
+find_free_neighbour proc
+	mov cl, 3 ; direction l r u d
+	call check_direction_free
+	jc @@free_found
+	mov cl, 2 ; direction l r u d
+	call check_direction_free
+	jc @@free_found
+	mov cl, 4 ; direction l r u d
+	call check_direction_free
+	jc @@free_found
+	mov cl, 1 ; direction l r u d
+	call check_direction_free
+	jc @@free_found
+
+@@not_found:
+	clc
+	ret
+@@free_found:
+	stc
+	ret
+find_free_neighbour endp
+
+check_direction_free proc
+	call get_next_position
+	push ds
+	push si
+	mov bx, 0b800h
+	mov ds, bx
+	lodsw ; ax <- ds:si
+	mov bx, ax
+	lodsw ; ax <- ds:si
+	pop si
+	pop ds
+	cmp ah, dirt_color
+	jne @@restricted
+	cmp bh, dirt_color
+	jne @@restricted
+@@free:
+	stc
+	ret
+@@restricted:
+	clc
+	ret
+check_direction_free endp
+
+get_next_position proc
+	push es
+	mov	bx, 0b800h
+	mov	es, bx
+	mov si, position
+
+	mov ax, position
+	mov dl, screen_width
+	div dl ; al /     ah %
+
+	cmp cl, 0
+	jz @@f
+	cmp cl, 1
+	jz @@left
+	cmp cl, 2
+	jz @@right
+	cmp cl, 3
+	jz @@up
+	cmp cl, 4
+	jz @@down
+
+@@left:
+	sub si, 2
+	cmp ah, 0   ; |*   |  
+	jnz @@f
+	mov si, position
+	add si, screen_width - 2 * 2
+	jmp @@f
+@@right:
+	add si, 2
+	cmp ah, screen_width - 2 * 2   ; |   *|  
+	jnz @@f
+	mov si, position
+	sub si, screen_width - 2 * 2
+	jmp @@f
+@@up:
+	sub si, screen_width
+	cmp al, 0
+	jnz @@f
+	mov si, position
+	add si, screen_width * (screen_height - 1)
+	jmp @@f
+@@down:
+	add si, screen_width
+	cmp al, screen_height - 1
+	jnz @@f
+	mov si, position
+	sub si, screen_width * (screen_height - 1)
+	jmp @@f
+
+@@f:
+	pop es
+	ret
+get_next_position endp
+
 key_int proc
 	push ax
 	push di
@@ -261,6 +379,9 @@ key_int proc
 
 	cmp al, 1ch
 	je @@enter
+
+	cmp al, 0fh
+	je @@tab
 
 	jmp skip
 
@@ -325,6 +446,10 @@ key_int proc
 
 @@enter:
 	mov al, 19
+	jmp save
+
+@@tab:
+	mov al, 20
 	jmp save
 
 save:
@@ -486,6 +611,7 @@ ccall restart
 	; 17 - +
 	; 18 - reload
 	; 19 - dig
+	; 20 - AI walk
 
 
     jnc @@1   ; jump carry flag CF == 0
@@ -609,6 +735,21 @@ draw_spravka endp
 
 
 timer_tick proc near
+	cmp is_ai_walk, 1
+	jne @@human
+	cli
+	call find_free_neighbour
+	sti
+	jnc @@not_found
+	mov direction, cl
+	jmp @@human
+@@not_found:
+	mov is_ai_walk, 0
+	mov is_autowalk, 0
+	mov direction, 0
+@@human:
+
+
 	mov	bx, 0b800h
 	mov	es, bx
 	mov si, position
