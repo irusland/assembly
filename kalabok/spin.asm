@@ -178,9 +178,20 @@ draw_grass proc
 	mov ah, wall_color
 	mov al, wall_char
 	mov cx, screen_width / 4
-@@line:
+@@hline:
 	stosw
-	loop @@line
+	loop @@hline
+
+	mov di, screen_width - 4
+	mov ah, wall_color
+	mov al, wall_char
+	mov cx, screen_height / 2
+@@vline:
+	stosw
+	stosw
+	add di, screen_width - 4
+	loop @@vline
+
 	ret
 draw_grass endp
 
