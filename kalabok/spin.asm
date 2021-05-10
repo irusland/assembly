@@ -144,7 +144,7 @@ restart proc
 	mov direction, 0
 	mov is_autowalk, 0
 	mov under[0], 0
-	mov under[1], 0
+	mov under[2], 0
 	mov propeller_frame_current, 0
 	mov ticks,	0
 	mov max_ticks, 3
@@ -664,6 +664,8 @@ timer_tick proc near
 	je @@under_skip
 	stosw
 	mov ax, under
+	cmp ax, 0
+	je @@under_skip
 	stosw
 @@under_skip:
 
