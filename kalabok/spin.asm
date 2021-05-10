@@ -118,7 +118,9 @@ dirt_color db 60h
 
 move_count db 0
 egg_pos dw screen_width * screen_vertical_mid + screen_horizontal_mid - 2
-score dw 0
+score db 0
+egg_char db 01h
+egg_spawn_rate equ 42
 
 change_direction proc
 	sub al, 7
@@ -176,6 +178,7 @@ restart proc
 	mov is_digging, 0
 	; buffer db 6 dup (0)
 	ccall draw_grass
+	ccall draw_score
 	ret
 restart endp
 
@@ -408,7 +411,7 @@ get_next_position endp
 spawn_egg proc
 	mov al, move_count
 	inc al
-	cmp move_count, 10
+	cmp move_count, egg_spawn_rate
 	jl @@not_ready
 	ccall draw_egg
 	mov ax, position
@@ -423,15 +426,42 @@ draw_egg proc
 	mov bx, 0b800h
 	mov es, bx
 	mov di, egg_pos
-	; mov es, di
-	mov ah, 0eh
-	mov al, '0'
-	stosw
-	stosw
-	stosw
+	mov al, egg_char
+	stosb
 
 	ret
 draw_egg endp
+
+draw_score proc
+	mov bx, 0b800h
+	mov es, bx
+	; mov di, score_position
+	mov di, 0
+	xor ax, ax
+	xor cx, cx
+	mov al, score
+	mov bl, 10
+@@l:
+	div bl ; al //    ah %
+	xor dx, dx
+	mov dl, ah
+	xor ah, ah
+	push dx
+	inc cx
+	cmp al, 0
+	jg @@l
+
+@@r:
+	pop ax
+	add al, 30h
+	mov ah, 70h
+	stosw
+	loop @@r
+
+	ret
+draw_score endp
+
+score_str db '___.'
 
 key_int proc
 	push ax
@@ -980,6 +1010,18 @@ timer_tick proc near
 	pop ds
 	mov under + 2, cx
 	mov under, ax
+
+	cmp cl, egg_char
+	je @@has_egg
+	cmp al, egg_char
+	je @@has_egg
+	jmp @@no_egg
+@@has_egg:
+	mov cl, score
+	inc cl
+	mov score, cl
+	ccall draw_score
+@@no_egg:
 
 	mov position, si
 @@restricted:
