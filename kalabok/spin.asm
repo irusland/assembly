@@ -121,6 +121,7 @@ egg_pos dw screen_width * screen_vertical_mid + screen_horizontal_mid - 2
 score db 0
 egg_char db 01h
 egg_spawn_rate equ 42
+score_position dw screen_width * (screen_height-2) + 2
 
 change_direction proc
 	sub al, 7
@@ -435,8 +436,7 @@ draw_egg endp
 draw_score proc
 	mov bx, 0b800h
 	mov es, bx
-	; mov di, score_position
-	mov di, 0
+	mov di, score_position
 	xor ax, ax
 	xor cx, cx
 	mov al, score
@@ -454,7 +454,7 @@ draw_score proc
 @@r:
 	pop ax
 	add al, 30h
-	mov ah, 70h
+	mov ah, 24h
 	stosw
 	loop @@r
 
@@ -1017,11 +1017,13 @@ timer_tick proc near
 	je @@has_egg
 	jmp @@no_egg
 @@has_egg:
+	cmp is_digging, 0
+	je @@no_egg
 	mov cl, score
 	inc cl
 	mov score, cl
-	ccall draw_score
 @@no_egg:
+	ccall draw_score
 
 	mov position, si
 @@restricted:
